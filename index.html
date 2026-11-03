@@ -64,6 +64,8 @@
   .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--border); }
   .btn-danger { background: var(--danger-bg); color: var(--danger); }
   .btn-sm { padding: 7px 11px; font-size: 12px; }
+  .btn-date-quick { padding: 4px 8px; font-size: 11px; font-weight: 700; border-radius: 6px; background: var(--gray-bg); color: var(--ink-light); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+  .btn-date-quick:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
   
   .auto-sync-status { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--green); font-weight: 700; background: var(--green-bg); padding: 7px 12px; border-radius: 999px; margin-left: auto; }
   .auto-sync-status.updating { color: var(--amber); background: var(--amber-bg); }
@@ -109,9 +111,15 @@
   .modal-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
   .modal-close { cursor: pointer; background: var(--gray-bg); border: none; width: 26px; height: 26px; border-radius: 6px; color: var(--ink); font-weight: bold; }
   .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-light); margin-bottom: 4px; }
-  .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 13.5px; }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); outline: none; }
+  .field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink-light); margin-bottom: 4px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 13.5px; transition: 0.2s; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+  .field input.error, .field textarea.error { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2); }
+  
+  /* Style cho lịch trên input type=date mượt hơn */
+  input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.2s; }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+  
   .field-row { display: flex; gap: 10px; } .field-row .field { flex: 1; }
   .cat-manage-row { display: flex; gap: 6px; } .cat-manage-row select { flex: 1; }
   .approver-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
@@ -126,6 +134,7 @@
   .group-manage-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
   .group-manage-item .gname { flex: 1; font-weight: 700; font-size: 13px; }
   
+  /* THỐNG KÊ */
   .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 18px; }
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .kpi-box { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 12px; text-align: center; }
@@ -144,6 +153,7 @@
           <div class="brand-text"><div class="eyebrow">NCC · Quản lý trình duyệt</div><h1>Shopdrawing & Biện pháp</h1></div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
+          <!-- NÚT GIAO DIỆN NGÀY / ĐÊM -->
           <button class="btn btn-ghost" id="themeToggleBtn" onclick="toggleTheme()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:16px; padding:6px 10px;" title="Đổi giao diện Ngày/Đêm">🌙</button>
           <div class="auth-area" id="authArea"></div>
         </div>
@@ -157,7 +167,7 @@
     <div id="appWrap"></div>
   </div>
 
-  <!-- MODAL: HỒ SƠ -->
+  <!-- MODAL: HỒ SƠ CƠ BẢN -->
   <div class="modal-overlay" id="docModal"><div class="modal">
     <div class="modal-head"><h3 id="docModalTitle">Thêm Bản vẽ / Kế hoạch</h3><button class="modal-close" onclick="closeModal('docModal')">✕</button></div>
     <div class="modal-body">
@@ -177,36 +187,42 @@
         </div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Ngày Kế hoạch xong</label><input type="date" id="docPlanDate"></div>
+        <div class="field">
+            <label>Ngày Kế hoạch xong <button type="button" class="btn-date-quick" onclick="document.getElementById('docPlanDate').value = todayIso()">Hôm nay</button></label>
+            <input type="date" id="docPlanDate">
+        </div>
         <div class="field"><label>Ghi chú</label><input type="text" id="docDesc"></div>
       </div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('docModal')">Hủy</button><button class="btn btn-primary" id="btnSaveDoc" onclick="saveDoc()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
   </div></div>
 
-  <!-- MODAL: VÒNG TRÌNH DUYỆT (TÍCH HỢP RFI, GIẢI TRÌNH, BẢN VẼ DUYỆT) -->
+  <!-- MODAL: VÒNG TRÌNH DUYỆT (ĐÃ THÊM NÚT "HÔM NAY" CHO TẤT CẢ NGÀY THÁNG) -->
   <div class="modal-overlay" id="roundModal"><div class="modal">
     <div class="modal-head"><h3 id="roundModalTitle">Cập nhật vòng trình</h3><button class="modal-close" onclick="closeModal('roundModal')">✕</button></div>
     <div class="modal-body">
       
       <div class="field-row">
-        <div class="field"><label>Ngày trình *</label><input type="date" id="roundSubmitDate"></div>
+        <div class="field">
+            <label>Ngày trình * <button type="button" class="btn-date-quick" onclick="document.getElementById('roundSubmitDate').value = todayIso(); document.getElementById('roundSubmitDate').classList.remove('error');">Hôm nay</button></label>
+            <input type="date" id="roundSubmitDate" oninput="this.classList.remove('error')">
+        </div>
         <div class="field"><label>SLA (Hạn phản hồi)</label><input type="number" id="roundSla"></div>
       </div>
 
-      <!-- KHU VỰC BẮT BUỘC GIẢI TRÌNH NẾU LẦN TRƯỚC BỊ REJECT -->
+      <!-- KHU VỰC BẮT BUỘC GIẢI TRÌNH -->
       <div id="resolutionBlock" style="display:none; background:rgba(245,158,11,0.1); border:1px dashed var(--amber); padding:12px; border-radius:8px; margin-bottom:12px;">
         <div style="font-size:12px; font-weight:800; color:var(--amber); margin-bottom:6px;">⚠️ Yêu cầu giải trình comment từ lần nộp trước:</div>
         <div id="prevCommentText" style="font-size:12.5px; color:var(--ink-light); font-style:italic; margin-bottom:10px; padding-left:10px; border-left:2px solid var(--amber);"></div>
         <div class="field">
           <label style="color:var(--amber);">Nội dung giải trình / Biện pháp khắc phục *</label>
-          <textarea id="roundResolution" rows="2" placeholder="Ví dụ: Đã sửa lại chi tiết thép tại mặt cắt A-A..."></textarea>
+          <textarea id="roundResolution" rows="2" placeholder="Ví dụ: Đã sửa lại chi tiết thép tại mặt cắt A-A..." oninput="this.classList.remove('error')"></textarea>
         </div>
       </div>
 
       <div class="field">
         <label>Link file hồ sơ nộp trình (PDF/CAD) *</label>
-        <input type="url" id="roundFileLink" placeholder="Link Drive bản vẽ...">
+        <input type="url" id="roundFileLink" placeholder="Link Drive bản vẽ..." oninput="this.classList.remove('error')">
       </div>
 
       <div class="field">
@@ -215,11 +231,24 @@
       </div>
 
       <div class="approver-block"><div style="font-size:12px; font-weight:800; color:var(--primary);">🧭 Tư vấn giám sát (TVGS)</div>
-        <div class="field-row"><div class="field"><select id="tvgsStatus"><option value="cho-duyet">Chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div><div class="field"><input type="date" id="tvgsDate" title="Ngày TVGS phản hồi"></div></div>
+        <div class="field-row">
+            <div class="field"><select id="tvgsStatus"><option value="cho-duyet">Chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
+            <div class="field" style="position:relative;">
+                <input type="date" id="tvgsDate" title="Ngày TVGS phản hồi" style="padding-right: 70px;">
+                <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:5px;" onclick="document.getElementById('tvgsDate').value = todayIso()">Hôm nay</button>
+            </div>
+        </div>
         <div class="field" style="margin-top:8px;"><input type="url" id="tvgsLink" placeholder="Link văn bản TVGS..."></div>
       </div>
+      
       <div class="approver-block" id="bqlApprovalBlock"><div style="font-size:12px; font-weight:800; color:var(--primary);">🏢 Ban quản lý (BQL)</div>
-        <div class="field-row"><div class="field"><select id="bqlStatus"><option value="cho-duyet">Chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div><div class="field"><input type="date" id="bqlDate" title="Ngày BQL phản hồi"></div></div>
+        <div class="field-row">
+            <div class="field"><select id="bqlStatus"><option value="cho-duyet">Chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
+            <div class="field" style="position:relative;">
+                <input type="date" id="bqlDate" title="Ngày BQL phản hồi" style="padding-right: 70px;">
+                <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:5px;" onclick="document.getElementById('bqlDate').value = todayIso()">Hôm nay</button>
+            </div>
+        </div>
         <div class="field" style="margin-top:8px;"><input type="url" id="bqlLink" placeholder="Link văn bản BQL..."></div>
       </div>
       
@@ -241,7 +270,10 @@
       <div class="field"><label>Tên công việc / Bản vẽ *</label><input type="text" id="planTitle"></div>
       <div class="field-row">
         <div class="field"><label>Mã tham chiếu</label><input type="text" id="planCode"></div>
-        <div class="field"><label>Ngày duyệt xong *</label><input type="date" id="planDate"></div>
+        <div class="field">
+            <label>Ngày duyệt xong * <button type="button" class="btn-date-quick" onclick="document.getElementById('planDate').value = todayIso()">Hôm nay</button></label>
+            <input type="date" id="planDate">
+        </div>
       </div>
       <div class="field"><label>Nhân sự thực hiện</label><select id="planAssignee"></select></div>
       <div class="field"><label>Link với Hồ sơ có sẵn</label><select id="planLinkedDoc" onchange="togglePlanManualStatus()"></select></div>
@@ -356,7 +388,6 @@ async function sendDataToGoogleSheet(dataPayload) {
         return false;
     }
 }
-
 
 // Auth
 function isAuth(){ return currentUser !== null; }
@@ -811,6 +842,9 @@ function openRoundModal(dId, rId){
   const r = rId ? d.rounds.find(x=>x.id===rId) : null;
   document.getElementById('roundModalTitle').innerText = rId ? `Sửa vòng trình duyệt` : `Báo cáo trình duyệt mới`;
   
+  // Reset lỗi giao diện
+  document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+  
   const resBlock = document.getElementById('resolutionBlock'), prevText = document.getElementById('prevCommentText'), resInput = document.getElementById('roundResolution');
   let requireRes = false;
   if (!rId && d.rounds.length > 0) {
@@ -838,15 +872,20 @@ function openRoundModal(dId, rId){
 async function saveRound(){
   const dId = document.getElementById('roundModal').dataset.docId, d = docs.find(x=>x.id === dId);
   if(!canUpdateProgress(d.assignee)) { showToast('Bạn không có quyền báo cáo tiến độ cho bản vẽ này!'); return; }
-  if(!document.getElementById('roundSubmitDate').value){ alert('Vui lòng nhập Ngày trình!'); return; }
   
-  const resBlock = document.getElementById('resolutionBlock'), resInput = document.getElementById('roundResolution').value.trim();
-  if(resBlock.style.display === 'block' && resBlock.dataset.required === 'true' && !resInput) { alert('Bắt buộc phải nhập Nội dung giải trình cho lỗi của lần nộp trước!'); return; }
+  const submitDateEl = document.getElementById('roundSubmitDate');
+  if(!submitDateEl.value){ alert('Vui lòng nhập Ngày trình!'); submitDateEl.classList.add('error'); submitDateEl.focus(); return; }
+  
+  const fileLinkEl = document.getElementById('roundFileLink');
+  if(!fileLinkEl.value.trim()){ alert('Vui lòng nhập Link file hồ sơ nộp trình!'); fileLinkEl.classList.add('error'); fileLinkEl.focus(); return; }
+  
+  const resBlock = document.getElementById('resolutionBlock'), resInputEl = document.getElementById('roundResolution');
+  if(resBlock.style.display === 'block' && resBlock.dataset.required === 'true' && !resInputEl.value.trim()) { alert('Bắt buộc phải nhập Nội dung giải trình cho lỗi của lần nộp trước!'); resInputEl.classList.add('error'); resInputEl.focus(); return; }
   
   const nd = { 
-    id:uid(), submitDate:document.getElementById('roundSubmitDate').value, slaDays:parseInt(document.getElementById('roundSla').value)||7, 
-    fileLink:document.getElementById('roundFileLink').value.trim(), rfiLink:document.getElementById('roundRfiLink').value.trim(), 
-    resolutionNote:resInput, approvedLink:document.getElementById('roundApprovedLink').value.trim(),
+    id:uid(), submitDate:submitDateEl.value, slaDays:parseInt(document.getElementById('roundSla').value)||7, 
+    fileLink:fileLinkEl.value.trim(), rfiLink:document.getElementById('roundRfiLink').value.trim(), 
+    resolutionNote:resInputEl.value.trim(), approvedLink:document.getElementById('roundApprovedLink').value.trim(),
     tvgsStatus:document.getElementById('tvgsStatus').value, tvgsDate:document.getElementById('tvgsDate').value, tvgsLink:document.getElementById('tvgsLink').value.trim(), 
     bqlStatus:document.getElementById('bqlStatus').value, bqlDate:document.getElementById('bqlDate').value, bqlLink:document.getElementById('bqlLink').value.trim(), 
     note:document.getElementById('roundNote').value.trim(), createdAt:Date.now() 
