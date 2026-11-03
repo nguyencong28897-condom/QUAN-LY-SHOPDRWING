@@ -310,12 +310,8 @@
   <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================================
-// ĐÃ TỰ ĐỘNG CẬP NHẬT URL API GOOGLE APPS SCRIPT CỦA BẠN
-// ============================================================================
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTsHC531V8MPYeQRUOIuSbuVYe2pPu0OdT-6gQBTZghIMVyfsQVs5rz5psvxXEgi-75hVTQHls9dB/pub?output=csv";
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
-// ============================================================================
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', MEMBER_KEY = 'lhbimAccounts', ADMIN_SESSION_KEY = 'lhbimUser', ADMIN_PASSWORD = 'admin';
 const TYPE_META = { shopdrawing: { label:'Shopdrawing', icon:'📐' }, bienphap: { label:'Biện pháp thi công', icon:'📋' } };
@@ -329,7 +325,6 @@ let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup =
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
 let currentUser = safeJSON(sessionStorage.getItem(ADMIN_SESSION_KEY), null);
 
-// Helpers
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
 function todayIso(){ return new Date().toISOString().slice(0,10); }
 function addDays(d,n){ let x = new Date(d); x.setDate(x.getDate() + n); return x.toISOString().slice(0,10); }
@@ -341,13 +336,11 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); d
 function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(el) el.innerHTML = `<option value="">${dflt}</option>` + arr.map(x=>`<option value="${escapeHtml(x.val)}" ${x.val===sel?'selected':''}>${escapeHtml(x.lbl)}</option>`).join(''); }
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 
-// UI & Theme
 let currentTheme = localStorage.getItem('lhbimTheme') || 'dark';
 if (currentTheme === 'light') document.body.setAttribute('data-theme', 'light');
 function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', currentTheme); localStorage.setItem('lhbimTheme', currentTheme); document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '🌙' : '☀️'; }
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '🌙' : '☀️'; });
 
-// API Sync
 async function sendDataToGoogleSheet(dataPayload) {
     if (!GOOGLE_APP_SCRIPT_API_URL) { console.warn("Chưa cấu hình API URL"); return true; }
     try { 
@@ -363,7 +356,6 @@ async function sendDataToGoogleSheet(dataPayload) {
     }
 }
 
-// Auth
 function isAuth(){ return currentUser !== null; }
 function isAdmin(){ return currentUser && currentUser.role === 'admin'; }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
@@ -386,7 +378,6 @@ function renderAuthArea(){
 function canUpdateProgress(docAssignee) { if (isAdmin()) return true; if (isMember() && docAssignee) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } return false; }
 function requireAdminAction(){ if(!isAdmin()){ showToast('🔒 Chỉ Quản lý (Admin) mới có quyền này!'); return false; } return true; }
 
-// Load & Save Data (Local)
 function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function saveCategories(){ localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
 function saveGroups(){ localStorage.setItem(GROUP_KEY, JSON.stringify(groups)); }
@@ -406,7 +397,6 @@ async function loadAll(){
   } catch(e) { console.warn("Lỗi tải Excel:", e); }
 }
 
-// LOGIC PHÂN LOẠI TAB (DỰA VÀO CỘT 4 - NHÓM)
 function parseCSVToDocs(text) {
   const lines = text.split("\n"); const docsMap = {}; 
   for (let i = 1; i < lines.length; i++) {
@@ -466,7 +456,6 @@ async function forceUpdateData(isAuto = false) {
   setTimeout(() => { if(syncEl) syncEl.classList.remove('updating'); if(!isAuto) showToast('Đã làm mới!'); }, 600);
 }
 
-// Logic & Filters
 function docTypeGroups(type){ return groups[type] || []; }
 function groupById(type, id){ return docTypeGroups(type).find(g => g.id === id) || null; }
 function docTypeCategories(type){ return categories[type] || []; }
@@ -510,7 +499,6 @@ function groupedDocs(){
   return ordered;
 }
 
-// System Rendering
 function render(){
   renderAuthArea(); 
   document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
@@ -528,7 +516,6 @@ function goBack(){ viewState = 'list'; selectedId = null; render(); }
 function goToDetail(id){ selectedId = id; viewState = 'detail'; render(); window.scrollTo(0,0); }
 function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = d.type; currentView = 'docs'; goToDetail(id); } }
 
-// Tab 1: Danh sách
 function renderDocRow(d){
   const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0, deadline = r ? addDays(r.submitDate, r.slaDays||7) : null;
   const is1Step = d.workflow === '1-buoc';
@@ -580,7 +567,6 @@ function renderListView(){
   `;
 }
 
-// Chi tiết & Lịch sử
 function renderDetailView(){
   const d = docs.find(x => x.id === selectedId); if(!d) { goBack(); return ''; }
   const sorted = sortedRounds(d).reverse(), latest = sorted[0], currentOverdue = latest ? overdueDays(latest, d) : 0, approvedCount = (d.rounds||[]).filter(r => overallStatus(r, d) === 'da-duyet' || overallStatus(r, d) === 'duyet-ghi-chu').length;
@@ -647,7 +633,6 @@ function renderDetailView(){
   `;
 }
 
-// Tab 2: Kế hoạch
 function renderPlanView(){
   let allPlans = [...plans[currentType]]; 
   docs.forEach(d => { if(d.type === currentType && d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { allPlans.push({ id: d.id, title: d.name, code: d.code, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); } });
@@ -693,7 +678,6 @@ function renderPlanView(){
   `;
 }
 
-// Tab 3: Thống kê
 function renderStatsView(){
   const list = docs; let statusCounts = { 'cho-duyet':0, 'da-duyet':0, 'duyet-ghi-chu':0, 'khong-duyet':0 };
   list.forEach(d => { const r = latestRound(d); if(r){ statusCounts[overallStatus(r, d)]++; } });
@@ -742,7 +726,6 @@ function renderStatsView(){
   `;
 }
 
-// Hành động Hồ sơ Gốc
 async function openDocModal(id, isPlanMode=false){
   if(!requireAdminAction()) return;
   editingDocId = id || null; const d = id ? docs.find(x=>x.id===id) : {};
@@ -786,7 +769,6 @@ async function saveDoc(){
   }
 }
 
-// Hành động Vòng trình duyệt
 function openRoundModal(dId, rId){
   editingRoundId = rId || null; const d = docs.find(x=>x.id===dId);
   if(!canUpdateProgress(d.assignee)) { showToast('Bạn không được phép cập nhật tiến độ bản vẽ của người khác!'); return; }
@@ -877,8 +859,19 @@ async function saveRound(){
   }
 }
 
-// Khởi chạy
-window.onload = async function() { try { await loadAll(); } catch(err) { loadFromLocalStorage(); } finally { try { render(); } catch (e) {} } };
+window.onload = async function() { 
+  try { 
+    await loadAll(); 
+  } catch(err) { 
+    console.error(err); 
+  } finally { 
+    try { 
+      render(); 
+    } catch (e) { 
+      console.error(e); 
+    } 
+  } 
+};
 </script>
 </body>
 </html>
