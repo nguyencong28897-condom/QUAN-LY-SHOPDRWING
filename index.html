@@ -39,7 +39,6 @@
   .brand-mark { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #22D3EE, #38BDF8); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 14px rgba(23,195,232,0.3); color:#0B0F19; }
   .brand-text .eyebrow { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: #9FC3FF; font-weight: 700; }
   .brand-text h1 { margin: 2px 0 0; font-size: 19px; font-weight: 800; }
-  .hero-badge { font-size: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 999px; color: #DCE8FF; cursor: pointer; transition: 0.2s; }
   
   .hero-stats { display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
   .hero-stat .num { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
@@ -147,7 +146,7 @@
           <div class="brand-text"><div class="eyebrow">NCC · Quản lý trình duyệt</div><h1>Shopdrawing & Biện pháp</h1></div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
-          <button class="btn btn-ghost" id="themeToggleBtn" onclick="toggleTheme()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:16px; padding:6px 10px;" title="Đổi giao diện Ngày/Đêm">🌙</button>
+          <button class="btn btn-ghost" onclick="toggleTheme()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:16px; padding:6px 10px;" title="Đổi giao diện Ngày/Đêm">🌙</button>
           <div class="auth-area" id="authArea"></div>
         </div>
       </div>
@@ -306,11 +305,11 @@
   <div class="modal-overlay" id="loginModal"><div class="modal" style="max-width:380px;">
     <div class="modal-head"><h3>🔒 Đăng nhập hệ thống</h3><button class="modal-close" onclick="closeModal('loginModal')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Tên đăng nhập</label><input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." onkeydown="if(event.key==='Enter') window.attemptLoginAction();"></div>
-      <div class="field"><label>Mật khẩu</label><input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') window.attemptLoginAction();"></div>
+      <div class="field"><label>Tên đăng nhập</label><input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." onkeydown="if(event.key==='Enter') executeLogin();"></div>
+      <div class="field"><label>Mật khẩu</label><input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') executeLogin();"></div>
       <div id="loginError" style="color:var(--danger); font-size:12px; font-weight:700;"></div>
     </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('loginModal')">Hủy</button><button class="btn btn-primary" onclick="window.attemptLoginAction()">Đăng nhập</button></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('loginModal')">Hủy</button><button class="btn btn-primary" onclick="executeLogin()">Đăng nhập</button></div>
   </div></div>
 
   <div class="toast" id="toast"></div>
@@ -338,14 +337,11 @@ let planFilterType = 'all';
 let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId = null;
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', sortMode = 'urgent';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
-let currentUser = safeJSON(sessionStorage.getItem(ADMIN_SESSION_KEY), null);
+let currentUser = null;
 
 // Helpers
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
-function makeStableDocId(code, name) {
-  const raw = ((code || '') + '_' + (name || '')).trim().toLowerCase();
-  return 'doc_' + encodeURIComponent(raw).replace(/[^a-zA-Z0-9_-]/g, '_');
-}
+function makeStableDocId(code, name) { return 'doc_' + encodeURIComponent(((code||'')+'_'+(name||'')).trim().toLowerCase()).replace(/[^a-zA-Z0-9_-]/g, '_'); }
 function todayIso(){ return new Date().toISOString().slice(0,10); }
 function addDays(d,n){ if(!d) return ''; let x = new Date(d); if(isNaN(x)) return ''; x.setDate(x.getDate() + (parseInt(n)||0)); return x.toISOString().slice(0,10); }
 function daysBetween(a,b){ return Math.floor((new Date(b) - new Date(a)) / 86400000); }
@@ -358,35 +354,24 @@ function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !=
 
 let currentTheme = localStorage.getItem('lhbimTheme') || 'dark';
 if (currentTheme === 'light') document.body.setAttribute('data-theme', 'light');
-function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', currentTheme); localStorage.setItem('lhbimTheme', currentTheme); document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '🌙' : '☀️'; }
-document.addEventListener('DOMContentLoaded', () => { const btn = document.getElementById('themeToggleBtn'); if(btn) btn.innerText = currentTheme === 'dark' ? '🌙' : '☀️'; });
+function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', currentTheme); localStorage.setItem('lhbimTheme', currentTheme); }
 
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
   try {
-    const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(dataPayload)
-    });
-    const text = await res.text();
-    const json = safeJSON(text, null);
-    return json && json.status === 'success';
-  } catch (e) {
-    console.error("Lỗi gửi dữ liệu lên Google Sheet:", e);
-    return false;
-  }
+    const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(dataPayload) });
+    const json = safeJSON(await res.text(), null); return json && json.status === 'success';
+  } catch (e) { return false; }
 }
 
 // -----------------------------------------------------
-// HỆ THỐNG PHÂN QUYỀN MỚI
+// HỆ THỐNG ĐĂNG NHẬP VÀ PHÂN QUYỀN
 // -----------------------------------------------------
-function isAuth(){ return currentUser !== null; }
 function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
 function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
 
-window.openLoginModalAction = function() {
+function openAuthModal() {
   document.getElementById('loginUsername').value = ''; 
   document.getElementById('loginPassword').value = ''; 
   document.getElementById('loginError').innerText = ''; 
@@ -394,55 +379,41 @@ window.openLoginModalAction = function() {
   setTimeout(() => document.getElementById('loginUsername').focus(), 50);
 }
 
-window.attemptLoginAction = function() {
+function executeLogin() {
   const u = document.getElementById('loginUsername').value.trim();
   const p = document.getElementById('loginPassword').value.trim();
-  const errEl = document.getElementById('loginError');
-
   if(u.toLowerCase() === 'admin' && p === ADMIN_PASSWORD) { 
     currentUser = { name: 'Admin', role: 'superadmin' }; 
   } else {
     const acc = accounts.find(a => a.name.toLowerCase() === u.toLowerCase() && a.pass === p);
-    if(acc) { 
-      currentUser = { name: acc.name, role: acc.role || 'member' }; 
-    } else { 
-      errEl.innerText = 'Sai tài khoản hoặc mật khẩu!'; 
-      return; 
-    }
+    if(acc) { currentUser = { name: acc.name, role: acc.role || 'member' }; } 
+    else { document.getElementById('loginError').innerText = 'Sai tài khoản hoặc mật khẩu!'; return; }
   }
   sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser)); 
-  closeModal('loginModal'); 
-  render(); 
-  showToast(`Đăng nhập thành công!`);
+  closeModal('loginModal'); render(); showToast(`Đăng nhập thành công!`);
 }
 
-window.logoutAction = function() { 
-  currentUser = null; 
-  sessionStorage.removeItem(ADMIN_SESSION_KEY); 
-  render(); 
-  showToast('Đã đăng xuất!'); 
+function executeLogout() { 
+  currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); render(); showToast('Đã đăng xuất!'); 
 }
 
 function renderAuthArea(){
   const wrap = document.getElementById('authArea');
   if(!currentUser) { 
-    wrap.innerHTML = `<div class="hero-badge" onclick="window.openLoginModalAction()" style="background: var(--primary); color: #fff; font-weight: bold; padding: 8px 16px;">🔒 Đăng nhập</div>`; 
+    wrap.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()" style="font-size: 13px; padding: 7px 16px;">🔒 Đăng nhập</button>`; 
   } else { 
     let roleBadge = '👤 ' + escapeHtml(currentUser.name);
     if(isSuperAdmin()) roleBadge = '👑 Quản trị';
     else if(isManager()) roleBadge = '⭐ Trưởng nhóm';
-    wrap.innerHTML = `<div class="admin-pill" style="cursor:pointer;" onclick="window.logoutAction()"><span class="dot"></span> ${roleBadge} - Thoát</div>`; 
+    wrap.innerHTML = `<div class="admin-pill" onclick="executeLogout()"><span class="dot"></span> ${roleBadge} - Thoát</div>`; 
   }
 }
 
 function canUpdateProgress(docAssignee) { 
   if (isManager()) return true; 
-  if (isMember() && docAssignee) { 
-    return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); 
-  } 
+  if (isMember() && docAssignee) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } 
   return false; 
 }
-
 function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
 function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
 // -----------------------------------------------------
@@ -452,7 +423,6 @@ function saveCategories(){ localStorage.setItem(CATEGORY_KEY, JSON.stringify(cat
 function saveGroups(){ localStorage.setItem(GROUP_KEY, JSON.stringify(groups)); }
 function savePlans(){ localStorage.setItem(PLAN_KEY, JSON.stringify(plans)); }
 function saveMembers(){ localStorage.setItem(MEMBER_KEY, JSON.stringify(accounts)); }
-function loadFromLocalStorage(){ docs = safeJSON(localStorage.getItem(STORAGE_KEY), []); }
 
 async function loadAll(){
   categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories);
@@ -473,33 +443,21 @@ async function loadAll(){
     const apiRes = await fetch(GOOGLE_APP_SCRIPT_API_URL + "?t=" + Date.now());
     if (apiRes.ok) {
       const json = await apiRes.json();
-      if (json && json.status === 'success' && Array.isArray(json.rows)) {
-        docs = parseRowsToDocs(json.rows);
-        saveDocs();
-        return;
-      }
+      if (json && json.status === 'success' && Array.isArray(json.rows)) { docs = parseRowsToDocs(json.rows); saveDocs(); return; }
     }
-  } catch (err) {
-    console.warn("Chưa bật doGet trên Apps Script, đọc CSV:", err);
-  }
+  } catch (err) { }
 
   try {
     const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now());
     if (!res.ok) throw new Error("Mạng lỗi");
     const text = await res.text();
     if (text.trim().toLowerCase().startsWith('<html')) throw new Error("Lỗi HTML");
-    const csvRows = parseCSVTextToRows(text);
-    docs = parseRowsToDocs(csvRows);
-    saveDocs();
-  } catch(e) {
-    console.warn("Lỗi tải CSV, dùng localStorage:", e);
-    loadFromLocalStorage();
-  }
+    docs = parseRowsToDocs(parseCSVTextToRows(text)); saveDocs();
+  } catch(e) { docs = safeJSON(localStorage.getItem(STORAGE_KEY), []); }
 }
 
 function parseCSVTextToRows(text) {
-  const lines = text.split(/\r?\n/);
-  const rows = [];
+  const lines = text.split(/\r?\n/); const rows = [];
   for (let i = 0; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const cols = []; let curr = '', inQ = false;
@@ -510,75 +468,48 @@ function parseCSVTextToRows(text) {
       else if (char === ',' && !inQ) { cols.push(curr); curr = ''; }
       else { curr += char; }
     }
-    cols.push(curr);
-    rows.push(cols);
+    cols.push(curr); rows.push(cols);
   }
   return rows;
 }
 
 function parseDateToIso(d) {
-  if (!d) return '';
-  const s = String(d).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (!d) return ''; const s = String(d).trim(); if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
   const p = s.split(/[\/\-]/);
   if (p.length === 3) {
     if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
     return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-  }
-  return s;
+  } return s;
 }
 
 function parseRowsToDocs(rows) {
   const docsMap = {};
   for (let i = 1; i < rows.length; i++) {
-    const cols = rows[i];
-    if (!cols || cols.length < 3) continue;
-    const code = String(cols[1] || '').trim();
-    const name = String(cols[2] || '').trim();
+    const cols = rows[i]; if (!cols || cols.length < 3) continue;
+    const code = String(cols[1] || '').trim(), name = String(cols[2] || '').trim();
     if (!code && !name) continue;
 
     const loaiHoSoTxt = String(cols[3] || '').trim().toLowerCase();
     const loaiHoSo = (loaiHoSoTxt.includes('biện pháp') || loaiHoSoTxt === 'bienphap') ? 'bienphap' : 'shopdrawing';
 
     const catName = String(cols[4] || '').trim();
-    if (catName && !categories[loaiHoSo].includes(catName)) {
-      categories[loaiHoSo].push(catName);
-      saveCategories();
-    }
+    if (catName && !categories[loaiHoSo].includes(catName)) { categories[loaiHoSo].push(catName); saveCategories(); }
 
     const assigneeName = String(cols[5] || '').trim();
     if (assigneeName && !accounts.some(a => a.name.toLowerCase() === assigneeName.toLowerCase())) {
-      accounts.push({ name: assigneeName, pass: '123', role: 'member' });
-      saveMembers();
+      accounts.push({ name: assigneeName, pass: '123', role: 'member' }); saveMembers();
     }
 
     const pDate = cols.length > 19 ? parseDateToIso(cols[19]) : '';
     const rawWf = cols.length > 23 ? String(cols[23] || '').trim() : '';
     const workflow = (rawWf.includes('1') || rawWf.toLowerCase().includes('chỉ tvgs')) ? '1-buoc' : '2-buoc';
-
-    const docKey = (code || name).toLowerCase();
-    const stableId = makeStableDocId(code, name);
+    const docKey = (code || name).toLowerCase(), stableId = makeStableDocId(code, name);
 
     if (!docsMap[docKey]) {
-      docsMap[docKey] = {
-        id: stableId,
-        stt: parseInt(cols[0]) || (Object.keys(docsMap).length + 1),
-        type: loaiHoSo,
-        code: code,
-        name: name,
-        groupId: '',
-        category: catName,
-        assignee: assigneeName,
-        desc: String(cols[6] || '').trim(),
-        plannedDate: pDate,
-        workflow: workflow,
-        rounds: []
-      };
+      docsMap[docKey] = { id: stableId, stt: parseInt(cols[0]) || (Object.keys(docsMap).length + 1), type: loaiHoSo, code: code, name: name, groupId: '', category: catName, assignee: assigneeName, desc: String(cols[6] || '').trim(), plannedDate: pDate, workflow: workflow, rounds: [] };
     }
 
-    const roundRaw = String(cols[7] || '').trim();
-    const submitRaw = String(cols[8] || '').trim();
-    if (roundRaw || submitRaw) {
+    if (String(cols[7] || '').trim() || String(cols[8] || '').trim()) {
       const getSt = (lbl) => {
         lbl = String(lbl || '').toLowerCase();
         if (lbl.includes('không')) return 'khong-duyet';
@@ -586,46 +517,21 @@ function parseRowsToDocs(rows) {
         if (lbl.includes('đã duyệt')) return 'da-duyet';
         return 'cho-duyet';
       };
-      const rNum = parseInt(roundRaw) || (docsMap[docKey].rounds.length + 1);
+      const rNum = parseInt(String(cols[7] || '').trim()) || (docsMap[docKey].rounds.length + 1);
       docsMap[docKey].rounds.push({
-        id: `${stableId}_r_${rNum}`,
-        roundNum: rNum,
-        submitDate: parseDateToIso(cols[8]),
-        slaDays: parseInt(cols[10]) || 3,
-        tvgsStatus: getSt(cols[11]),
-        tvgsDate: parseDateToIso(cols[12]),
-        tvgsLink: String(cols[13] || '').trim(),
-        bqlStatus: getSt(cols[14]),
-        bqlDate: parseDateToIso(cols[15]),
-        bqlLink: String(cols[16] || '').trim(),
-        note: String(cols[17] || '').trim(),
-        fileLink: String(cols[18] || '').trim(),
-        rfiLink: String(cols.length > 20 ? cols[20] : '').trim(),
-        resolutionNote: String(cols.length > 21 ? cols[21] : '').trim(),
-        approvedLink: String(cols.length > 22 ? cols[22] : '').trim(),
-        createdAt: rNum
+        id: `${stableId}_r_${rNum}`, roundNum: rNum, submitDate: parseDateToIso(cols[8]), slaDays: parseInt(cols[10]) || 3, tvgsStatus: getSt(cols[11]), tvgsDate: parseDateToIso(cols[12]), tvgsLink: String(cols[13] || '').trim(), bqlStatus: getSt(cols[14]), bqlDate: parseDateToIso(cols[15]), bqlLink: String(cols[16] || '').trim(), note: String(cols[17] || '').trim(), fileLink: String(cols[18] || '').trim(), rfiLink: String(cols.length > 20 ? cols[20] : '').trim(), resolutionNote: String(cols.length > 21 ? cols[21] : '').trim(), approvedLink: String(cols.length > 22 ? cols[22] : '').trim(), createdAt: rNum
       });
     }
-  }
-  return Object.values(docsMap);
+  } return Object.values(docsMap);
 }
 
-setInterval(() => {
-  const anyModalOpen = document.querySelector('.modal-overlay.open');
-  if (document.visibilityState === 'visible' && !anyModalOpen) {
-    forceUpdateData(true);
-  }
-}, 60000);
+setInterval(() => { const anyModalOpen = document.querySelector('.modal-overlay.open'); if (document.visibilityState === 'visible' && !anyModalOpen) { forceUpdateData(true); } }, 60000);
 
 async function forceUpdateData(isAuto = false) {
   const syncEl = document.getElementById('syncStatus'); if(syncEl) syncEl.classList.add('updating');
   if(!isAuto) showToast('⏳ Đang đồng bộ dữ liệu từ Google Sheet...');
-  await loadAll();
-  render();
-  setTimeout(() => {
-    if(syncEl) syncEl.classList.remove('updating');
-    if(!isAuto) showToast('✅ Đã cập nhật dữ liệu mới nhất!');
-  }, 500);
+  await loadAll(); render();
+  setTimeout(() => { if(syncEl) syncEl.classList.remove('updating'); if(!isAuto) showToast('✅ Đã cập nhật dữ liệu mới nhất!'); }, 500);
 }
 
 function docTypeGroups(type){ return groups[type] || []; }
@@ -636,8 +542,7 @@ function sortedRounds(d){ return [...(d.rounds||[])].sort((a,b) => (a.roundNum||
 function latestRound(d){ const s = sortedRounds(d); return s.length ? s[s.length-1] : null; }
 
 function overallStatus(r, d){ 
-  if(!r) return null; 
-  const is1Step = d && (d.workflow === '1-buoc');
+  if(!r) return null; const is1Step = d && (d.workflow === '1-buoc');
   if (r.tvgsStatus === 'khong-duyet' || (!is1Step && r.bqlStatus === 'khong-duyet')) return 'khong-duyet';
   if (r.tvgsStatus === 'cho-duyet' || (!is1Step && r.bqlStatus === 'cho-duyet')) return 'cho-duyet';
   if (r.tvgsStatus === 'duyet-ghi-chu' || (!is1Step && r.bqlStatus === 'duyet-ghi-chu')) return 'duyet-ghi-chu';
@@ -645,8 +550,7 @@ function overallStatus(r, d){
 }
 function overdueDays(r, d){
   if(!r || !r.submitDate || overallStatus(r, d) !== 'cho-duyet') return 0;
-  const dl = daysBetween(todayIso(), addDays(r.submitDate, r.slaDays||3));
-  return dl < 0 ? -dl : 0;
+  const dl = daysBetween(todayIso(), addDays(r.submitDate, r.slaDays||3)); return dl < 0 ? -dl : 0;
 }
 function isDocOverdue(d){ const r = latestRound(d); return r ? overdueDays(r, d) > 0 : false; }
 function getDocState(d){ const r = latestRound(d); if(!r) return 'chua-trinh'; const st = overallStatus(r, d); return (st === 'da-duyet' || st === 'duyet-ghi-chu') ? 'hoan-thanh' : 'dang-xu-ly'; }
@@ -659,18 +563,9 @@ function filteredDocs(){
   if(filterStatus !== 'all'){ if(filterStatus === 'overdue') list = list.filter(isDocOverdue); else list = list.filter(d => { const r = latestRound(d); return r && overallStatus(r, d) === filterStatus; }); }
   return list;
 }
-function sortDocsInPlace(list){
-  list.sort((a,b) => (a.stt||0) - (b.stt||0));
-  return list;
-}
-function groupedDocs(){
-  const list = filteredDocs();
-  return [{ key: '__all__', label: TYPE_META[currentType].label, items: sortDocsInPlace(list) }];
-}
-function toggleGroup(key){
-  if(collapsedGroups.has(key)) collapsedGroups.delete(key); else collapsedGroups.add(key);
-  render();
-}
+function sortDocsInPlace(list){ list.sort((a,b) => (a.stt||0) - (b.stt||0)); return list; }
+function groupedDocs(){ return [{ key: '__all__', label: TYPE_META[currentType].label, items: sortDocsInPlace(filteredDocs()) }]; }
+function toggleGroup(key){ if(collapsedGroups.has(key)) collapsedGroups.delete(key); else collapsedGroups.add(key); render(); }
 
 // System Rendering
 function render(){
@@ -855,7 +750,7 @@ function renderPlanView(){
       <div style="display:flex; gap:6px;">
         <button class="btn ${planFilterType==='all'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='all'; render();">⚡ Tất Cả Kế Hoạch</button>
         <button class="btn ${planFilterType==='shopdrawing'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='shopdrawing'; render();">📐 Shopdrawing (SDS)</button>
-        <button class="btn ${planFilterType==='bienphap'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='bienphap'; render();">📋 Biện Pháp (MSS)</button>
+        <button class="btn ${planFilterType==='bienphap'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='bienphap'; render();">📋 Bi Pháp (MSS)</button>
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-cyan btn-sm" onclick="forceUpdateData()">🔄 Đồng bộ Sheet</button>
@@ -1234,16 +1129,8 @@ function savePlan(){
   savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
 }
 
-// Khởi chạy ứng dụng
 window.onload = async function() { 
-  try { 
-    await loadAll(); 
-  } catch(err) { 
-    console.error(err); 
-    loadFromLocalStorage(); 
-  } finally { 
-    render(); 
-  } 
+  try { await loadAll(); } catch(err) { loadFromLocalStorage(); } finally { render(); } 
 };
 </script>
 </body>
