@@ -165,8 +165,14 @@
   <div class="modal-overlay" id="docModal"><div class="modal">
     <div class="modal-head"><h3 id="docModalTitle">Thêm Bản vẽ / Kế hoạch</h3><button class="modal-close" onclick="closeModal('docModal')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Mã số bản vẽ *</label><input type="text" id="docCode" placeholder="VD: SDS-001" oninput="this.classList.remove('error')"></div>
+      <div class="field"><label>Mã số bản vẽ *</label><input type="text" id="docCode" placeholder="VD: SDS-001 hoặc MSS-01" oninput="this.classList.remove('error')"></div>
       <div class="field-row">
+        <div class="field"><label>Loại (Shopdrawing / Biện pháp)</label>
+          <select id="docTypeSelect">
+            <option value="shopdrawing">📐 Shopdrawing (SDS)</option>
+            <option value="bienphap">📋 Biện pháp thi công (MSS)</option>
+          </select>
+        </div>
         <div class="field"><label>Hạng mục</label><div class="cat-manage-row"><select id="docCategory"></select><button type="button" class="btn btn-ghost btn-sm" onclick="quickAddCategory()">＋</button></div></div>
       </div>
       <div class="field"><label>Tên bản vẽ / biện pháp *</label><input type="text" id="docName" oninput="this.classList.remove('error')"></div>
@@ -313,12 +319,19 @@ const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', MEMBER_KEY = 'lhbimAccounts', ADMIN_SESSION_KEY = 'lhbimUser', ADMIN_PASSWORD = 'admin';
-const TYPE_META = { shopdrawing: { label:'Shopdrawing', icon:'📐' }, bienphap: { label:'Biện pháp thi công', icon:'📋' } };
+
+// BỔ SUNG THÊM TAB 'all' ĐỂ XEM TẤT CẢ CÙNG LÚC (SDS VÀ MSS)
+const TYPE_META = { 
+  all: { label:'⚡ Tất Cả (SDS & MSS)', icon:'' },
+  shopdrawing: { label:'📐 Shopdrawing (SDS)', icon:'' }, 
+  bienphap: { label:'📋 Biện Pháp (MSS)', icon:'' } 
+};
+
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
 
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] }, accounts = []; 
 let settings = { defaultSla: 3 };
-let currentType = 'shopdrawing', currentView = 'docs', statsType = 'all', viewState = 'list';
+let currentType = 'all', currentView = 'docs', statsType = 'all', viewState = 'list'; // Mặc định mở lên là xem "Tất cả"
 let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId = null;
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', sortMode = 'urgent';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
@@ -340,15 +353,11 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); d
 function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(el) el.innerHTML = `<option value="">${dflt}</option>` + arr.map(x=>`<option value="${escapeHtml(x.val)}" ${x.val===sel?'selected':''}>${escapeHtml(x.lbl)}</option>`).join(''); }
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 
-// UI & Theme
 let currentTheme = localStorage.getItem('lhbimTheme') || 'dark';
 if (currentTheme === 'light') document.body.setAttribute('data-theme', 'light');
 function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', currentTheme); localStorage.setItem('lhbimTheme', currentTheme); document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '🌙' : '☀️'; }
 document.addEventListener('DOMContentLoaded', () => { const btn = document.getElementById('themeToggleBtn'); if(btn) btn.innerText = currentTheme === 'dark' ? '🌙' : '☀️'; });
 
-// ============================================================================
-// ĐỒNG BỘ LÊN GOOGLE SHEET (DÙNG TEXT/PLAIN ĐỂ KHÔNG BỊ LỖI CORS PREFLIGHT)
-// ============================================================================
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
   try {
@@ -366,7 +375,6 @@ async function sendDataToGoogleSheet(dataPayload) {
   }
 }
 
-// Auth
 function isAuth(){ return currentUser !== null; }
 function isAdmin(){ return currentUser && currentUser.role === 'admin'; }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
@@ -389,7 +397,6 @@ function renderAuthArea(){
 function canUpdateProgress(docAssignee) { if (isAdmin()) return true; if (isMember() && docAssignee) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } return false; }
 function requireAdminAction(){ if(!isAdmin()){ showToast('🔒 Vui lòng đăng nhập tài khoản Admin để thực hiện!'); return false; } return true; }
 
-// Local Storage
 function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function saveCategories(){ localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
 function saveGroups(){ localStorage.setItem(GROUP_KEY, JSON.stringify(groups)); }
@@ -397,9 +404,6 @@ function savePlans(){ localStorage.setItem(PLAN_KEY, JSON.stringify(plans)); }
 function saveMembers(){ localStorage.setItem(MEMBER_KEY, JSON.stringify(accounts)); }
 function loadFromLocalStorage(){ docs = safeJSON(localStorage.getItem(STORAGE_KEY), []); }
 
-// ============================================================================
-// TẢI DỮ LIỆU: ƯU TIÊN ĐỌC TRỰC TIẾP TỪ APPS SCRIPT (REAL-TIME), DỰ PHÒNG CSV
-// ============================================================================
 async function loadAll(){
   categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories);
   groups = safeJSON(localStorage.getItem(GROUP_KEY), groups);
@@ -410,7 +414,6 @@ async function loadAll(){
   }
   accounts = loadedAcc;
 
-  // 1. Thử lấy dữ liệu trực tiếp qua doGet của Apps Script (Không bị cache 5 phút)
   try {
     const apiRes = await fetch(GOOGLE_APP_SCRIPT_API_URL + "?t=" + Date.now());
     if (apiRes.ok) {
@@ -422,10 +425,9 @@ async function loadAll(){
       }
     }
   } catch (err) {
-    console.warn("Chưa bật doGet trên Apps Script hoặc lỗi mạng, chuyển sang đọc CSV:", err);
+    console.warn("Chưa bật doGet trên Apps Script, đọc CSV:", err);
   }
 
-  // 2. Dự phòng: Đọc qua link CSV nếu Apps Script chưa kịp cập nhật doGet
   try {
     const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now());
     if (!res.ok) throw new Error("Mạng lỗi");
@@ -435,7 +437,7 @@ async function loadAll(){
     docs = parseRowsToDocs(csvRows);
     saveDocs();
   } catch(e) {
-    console.warn("Lỗi tải CSV, dùng dữ liệu lưu tạm trên trình duyệt:", e);
+    console.warn("Lỗi tải CSV, dùng localStorage:", e);
     loadFromLocalStorage();
   }
 }
@@ -480,7 +482,6 @@ function parseRowsToDocs(rows) {
     const name = String(cols[2] || '').trim();
     if (!code && !name) continue;
 
-    // Cột D (index 3): Nhóm phân loại Shopdrawing / Biện pháp
     const loaiHoSoTxt = String(cols[3] || '').trim().toLowerCase();
     const loaiHoSo = (loaiHoSoTxt.includes('biện pháp') || loaiHoSoTxt === 'bienphap') ? 'bienphap' : 'shopdrawing';
 
@@ -554,7 +555,6 @@ function parseRowsToDocs(rows) {
   return Object.values(docsMap);
 }
 
-// Không tự động quét ngầm khi người dùng đang mở bảng nhập liệu để tránh gián đoạn
 setInterval(() => {
   const anyModalOpen = document.querySelector('.modal-overlay.open');
   if (document.visibilityState === 'visible' && !anyModalOpen) {
@@ -573,11 +573,17 @@ async function forceUpdateData(isAuto = false) {
   }, 500);
 }
 
-// Logic & Filters
+// Logic & Filters - ĐIỀU CHỈNH ĐỂ HIỂN THỊ TẤT CẢ KHI currentType === 'all'
 function docTypeGroups(type){ return groups[type] || []; }
 function groupById(type, id){ return docTypeGroups(type).find(g => g.id === id) || null; }
-function docTypeCategories(type){ return categories[type] || []; }
-function scopedDocs(){ return docs.filter(d => d.type === currentType); }
+function docTypeCategories(type){ 
+  if(currentType === 'all') return [...new Set([...categories.shopdrawing, ...categories.bienphap])];
+  return categories[type] || []; 
+}
+function scopedDocs(){ 
+  if(currentType === 'all') return docs;
+  return docs.filter(d => d.type === currentType); 
+}
 function sortedRounds(d){ return [...(d.rounds||[])].sort((a,b) => (a.roundNum||0) - (b.roundNum||0)); }
 function latestRound(d){ const s = sortedRounds(d); return s.length ? s[s.length-1] : null; }
 
@@ -611,7 +617,7 @@ function sortDocsInPlace(list){
 }
 function groupedDocs(){
   const list = filteredDocs();
-  return [{ key: '__all__', label: `${TYPE_META[currentType].label}`, items: sortDocsInPlace(list) }];
+  return [{ key: '__all__', label: currentType === 'all' ? '⚡ Tất cả danh mục (SDS & MSS)' : TYPE_META[currentType].label, items: sortDocsInPlace(list) }];
 }
 function toggleGroup(key){
   if(collapsedGroups.has(key)) collapsedGroups.delete(key); else collapsedGroups.add(key);
@@ -621,7 +627,7 @@ function toggleGroup(key){
 // System Rendering
 function render(){
   renderAuthArea(); 
-  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
+  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${t==='all'?docs.length:docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
   const list = scopedDocs();
   document.getElementById('heroStats').innerHTML = `<div class="hero-stat"><div class="num grad">${list.length}</div><div class="lbl">Tổng hồ sơ</div></div><div class="hero-stat"><div class="num grad">${list.reduce((s,d) => s + (d.rounds ? d.rounds.length : 0), 0)}</div><div class="lbl">Lượt trình</div></div><div class="hero-stat"><div class="num alert">${list.filter(isDocOverdue).length}</div><div class="lbl">🔴 Báo đỏ</div></div>`;
   const wrap = document.getElementById('appWrap');
@@ -634,17 +640,18 @@ function switchTab(t){ currentType = t; currentView = 'docs'; viewState = 'list'
 function switchView(v){ currentView = v; selectedPlans.clear(); render(); window.scrollTo(0,0); }
 function goBack(){ viewState = 'list'; selectedId = null; render(); }
 function goToDetail(id){ selectedId = id; viewState = 'detail'; render(); window.scrollTo(0,0); }
-function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = d.type; currentView = 'docs'; goToDetail(id); } }
+function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = 'all'; currentView = 'docs'; goToDetail(id); } }
 
 // Tab 1: Danh sách
 function renderDocRow(d){
   const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0;
   const is1Step = d.workflow === '1-buoc';
+  const typeBadge = d.type === 'bienphap' ? `<span class="tag" style="background:#854D0E; color:#FEF08A;">📋 MSS</span>` : `<span class="tag" style="background:#0369A1; color:#E0F2FE;">📐 SDS</span>`;
   return `
     <div class="doc-row ${od > 0 ? 'overdue' : ''}" onclick="goToDetail('${d.id}')">
       <div class="doc-row-top"><div class="stt">${d.stt}</div>
         <div class="doc-main">
-          <div class="doc-title-row"><span class="doc-code">${escapeHtml(d.code || '---')}</span> <span class="doc-name">${escapeHtml(d.name)}</span></div>
+          <div class="doc-title-row">${typeBadge} <span class="doc-code">${escapeHtml(d.code || '---')}</span> <span class="doc-name">${escapeHtml(d.name)}</span></div>
           <div class="doc-tag-row">
              ${d.category ? `<span class="tag cat-tag">${escapeHtml(d.category)}</span>` : ''} 
              ${is1Step ? `<span class="tag" style="background:#4F46E5; color:#fff;">⚡ Chỉ TVGS</span>` : ''}
@@ -664,7 +671,7 @@ function renderListView(){
   const cats = docTypeCategories(currentType), cOpts = cats.map(c => `<option value="${escapeHtml(c)}" ${filterCategory === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
   const groupedList = groupedDocs(), totalCount = groupedList.reduce((s,g) => s + g.items.length, 0);
 
-  let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào trong mục ${TYPE_META[currentType].label}.</div>` : groupedList.map(g => {
+  let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào.</div>` : groupedList.map(g => {
       const isC = collapsedGroups.has(g.key), odC = g.items.filter(isDocOverdue).length, rows = g.items.map(renderDocRow).join('');
       return `<div class="group-block"><div class="group-header ${isC ? 'collapsed' : ''}" onclick="toggleGroup('${escapeHtml(g.key)}')"><span class="group-name">${escapeHtml(g.label)}</span><span class="group-count">${g.items.length} hồ sơ</span> ${odC ? `<span class="group-overdue">🔴 ${odC}</span>` : ''}</div>${!isC ? `<div class="group-items">${rows}</div>` : ''}</div>`;
   }).join('');
@@ -759,7 +766,7 @@ function renderDetailView(){
 // Tab 2: Kế hoạch
 function renderPlanView(){
   let allPlans = [...(plans[currentType] || [])]; 
-  docs.forEach(d => { if(d.type === currentType && d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { allPlans.push({ id: d.id, title: d.name, code: d.code, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); } });
+  docs.forEach(d => { if(d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { allPlans.push({ id: d.id, title: d.name, code: d.code, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); } });
   allPlans.sort((a,b) => (a.plannedDate||'').localeCompare(b.plannedDate||''));
   
   const states = allPlans.map(p => {
@@ -848,30 +855,34 @@ function renderStatsView(){
   `;
 }
 
-// ============================================================================
-// HÀNH ĐỘNG: THÊM / SỬA HỒ SƠ GỐC
-// ============================================================================
+// Hành động: Thêm / Sửa hồ sơ gốc
 function quickAddCategory(){
+  const targetTypeCat = currentType === 'all' ? 'shopdrawing' : currentType;
   const c = prompt("Nhập tên hạng mục mới:");
   if(c && c.trim()){
     const clean = c.trim();
-    if(!categories[currentType].includes(clean)){
-      categories[currentType].push(clean);
+    if(!categories[targetTypeCat].includes(clean)){
+      categories[targetTypeCat].push(clean);
       saveCategories();
     }
-    popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —');
+    popSel('docCategory', categories[targetTypeCat].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —');
   }
 }
 
 async function openDocModal(id, isPlanMode=false){
   if(!requireAdminAction()) return;
   editingDocId = id || null; const d = id ? (docs.find(x=>x.id===id) || {}) : {};
-  document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : `Thêm ${TYPE_META[currentType].label} mới`;
+  document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : 'Thêm hồ sơ mới';
   document.getElementById('docCode').value = d.code||''; 
   document.getElementById('docName').value = d.name||''; 
   document.getElementById('docPlanDate').value = d.plannedDate||(isPlanMode?todayIso():''); 
   document.getElementById('docDesc').value = d.desc||'';
-  popSel('docCategory', categories[currentType].map(c=>({val:c, lbl:c})), d.category, '— Chọn hạng mục —'); 
+  
+  const targetTypeCat = d.type || (currentType === 'all' ? 'shopdrawing' : currentType);
+  const typeSelect = document.getElementById('docTypeSelect');
+  if(typeSelect) typeSelect.value = targetTypeCat;
+
+  popSel('docCategory', categories[targetTypeCat].map(c=>({val:c, lbl:c})), d.category, '— Chọn hạng mục —'); 
   popSel('docAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), d.assignee, '— Chọn người phụ trách —');
   document.getElementById('docWorkflow').value = d.workflow || '2-buoc';
   document.getElementById('docModal').classList.add('open');
@@ -882,11 +893,13 @@ async function saveDoc(){
     if(!requireAdminAction()) return;
     const codeEl = document.getElementById('docCode');
     const nameEl = document.getElementById('docName');
+    const typeSelect = document.getElementById('docTypeSelect');
     if(!codeEl.value.trim()){ alert("Vui lòng nhập Mã số bản vẽ!"); codeEl.classList.add('error'); codeEl.focus(); return; }
     if(!nameEl.value.trim()){ alert("Vui lòng nhập Tên bản vẽ/biện pháp!"); nameEl.classList.add('error'); nameEl.focus(); return; }
     
     const codeVal = codeEl.value.trim();
     const nameVal = nameEl.value.trim();
+    const selectedDocType = typeSelect ? typeSelect.value : (currentType === 'all' ? 'shopdrawing' : currentType);
     const stableId = makeStableDocId(codeVal, nameVal);
 
     const py = { 
@@ -898,15 +911,16 @@ async function saveDoc(){
       workflow: document.getElementById('docWorkflow').value,
       plannedDate: document.getElementById('docPlanDate').value,
       desc: document.getElementById('docDesc').value.trim(),
-      docType: currentType 
+      docType: selectedDocType 
     };
     
     let targetDoc = editingDocId ? docs.find(x=>x.id===editingDocId) : null;
     if(targetDoc) {
       Object.assign(targetDoc, py);
+      targetDoc.type = selectedDocType;
     } else {
       const newStt = docs.length ? Math.max(...docs.map(x=>x.stt||0))+1 : 1;
-      targetDoc = { id: stableId, stt: newStt, type: currentType, rounds: [], ...py };
+      targetDoc = { id: stableId, stt: newStt, type: selectedDocType, rounds: [], ...py };
       docs.push(targetDoc);
     }
     saveDocs();
@@ -924,14 +938,11 @@ async function saveDoc(){
   }
 }
 
-// ============================================================================
-// HÀNH ĐỘNG: CẬP NHẬT VÒNG TRÌNH DUYỆT (ĐÃ KHÓA CHẶT ID & CODE BẢN VẼ)
-// ============================================================================
+// Hành động: Cập nhật vòng trình duyệt
 function openRoundModal(dId, rId){
   const d = docs.find(x => x.id === dId);
   if(!d) { alert('Không tìm thấy hồ sơ bản vẽ này!'); return; }
 
-  // Tự động cho phép cập nhật nếu chưa đăng nhập hoặc đúng người phụ trách/Admin
   if(currentUser && !canUpdateProgress(d.assignee)) { 
     alert(`Bản vẽ này do "${d.assignee}" phụ trách. Bạn hãy đăng nhập bằng tài khoản Admin hoặc "${d.assignee}" để cập nhật!`); 
     return; 
@@ -943,9 +954,6 @@ function openRoundModal(dId, rId){
   modal.dataset.docCode = d.code;
   document.getElementById('roundDocIdHidden').value = d.id;
 
-  // Nếu bấm "Cập nhật tiến độ" từ ngoài danh sách và vòng mới nhất đang "Chờ duyệt",
-  // mặc định mở chế độ SỬA vòng hiện tại để cập nhật kết quả TVGS/BQL.
-  // Nếu vòng trước đã "Không duyệt" hoặc "Duyệt có ghi chú", tự động tạo Lần trình mới!
   let r = rId ? d.rounds.find(x => x.id === rId) : null;
   if (!rId && d.rounds && d.rounds.length > 0) {
     const latest = latestRound(d);
@@ -1006,7 +1014,6 @@ async function saveRound(){
     const dId = document.getElementById('roundDocIdHidden').value || modal.dataset.docId;
     const dCode = modal.dataset.docCode;
     
-    // Tìm hồ sơ bằng cả ID lẫn Mã số bản vẽ (Đảm bảo 100% không bao giờ bị lỗi không tìm thấy hồ sơ gốc)
     let d = docs.find(x => x.id === dId) || docs.find(x => x.code === dCode) || docs.find(x => x.id === selectedId);
     if(!d) { alert('Lỗi: Không xác định được bản vẽ cần lưu!'); return; }
     
@@ -1072,7 +1079,7 @@ async function saveRound(){
       desc: d.desc,
       workflow: d.workflow,
       plannedDate: d.plannedDate,
-      docType: d.type || currentType,
+      docType: d.type || 'shopdrawing',
       ...nd
     };
     
@@ -1096,9 +1103,7 @@ async function saveRound(){
   }
 }
 
-// ============================================================================
-// QUẢN LÝ NHÂN SỰ & KẾ HOẠCH RỜI
-// ============================================================================
+// Quản lý Nhân sự & Kế hoạch rời
 function openMemberManageModal(){
   if(!requireAdminAction()) return;
   renderMemberManageList();
@@ -1136,7 +1141,7 @@ function openPlanModal(){
   document.getElementById('planCode').value = '';
   document.getElementById('planDate').value = todayIso();
   popSel('planAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), '', '— Chọn nhân sự —');
-  popSel('planLinkedDoc', scopedDocs().map(d=>({val:d.id, lbl:`${d.code} - ${d.name}`})), '', '— Không liên kết —');
+  popSel('planLinkedDoc', docs.map(d=>({val:d.id, lbl:`[${d.type==='bienphap'?'MSS':'SDS'}] ${d.code} - ${d.name}`})), '', '— Không liên kết —');
   document.getElementById('planModal').classList.add('open');
 }
 function togglePlanManualStatus(){
@@ -1148,8 +1153,9 @@ function savePlan(){
   const dateEl = document.getElementById('planDate');
   if(!titleEl.value.trim()){ titleEl.classList.add('error'); return; }
   if(!dateEl.value){ dateEl.classList.add('error'); return; }
-  if(!plans[currentType]) plans[currentType] = [];
-  plans[currentType].push({
+  const targetKey = currentType === 'all' ? 'shopdrawing' : currentType;
+  if(!plans[targetKey]) plans[targetKey] = [];
+  plans[targetKey].push({
     id: uid(),
     title: titleEl.value.trim(),
     code: document.getElementById('planCode').value.trim(),
