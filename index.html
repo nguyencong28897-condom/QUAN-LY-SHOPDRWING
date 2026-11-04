@@ -283,12 +283,11 @@
 
   <!-- MODAL: TÀI KHOẢN -->
   <div class="modal-overlay" id="memberManageModal"><div class="modal" style="max-width:650px;">
-    <div class="modal-head"><h3>Cấp Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
+    <div class="modal-head"><h3>Quản lý Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
     <div class="modal-body">
-      
       <div class="field-row" style="background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end;">
         <div class="field"><label style="color:#fff;">Tên nhân sự mới</label><input type="text" id="newMemName" placeholder="VD: KS CÔNG"></div>
-        <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Mặc định: 123"></div>
+        <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Nhập mật khẩu..."></div>
         <div class="field">
           <label style="color:#fff;">Phân quyền</label>
           <select id="newMemRole">
@@ -308,7 +307,7 @@
   <div class="modal-overlay" id="loginModal"><div class="modal" style="max-width:380px;">
     <div class="modal-head"><h3>🔒 Đăng nhập hệ thống</h3><button class="modal-close" onclick="closeModal('loginModal')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Tên đăng nhập</label><input type="text" id="loginUsername" placeholder="Nhập tên..." onkeydown="if(event.key==='Enter') attemptLogin();"></div>
+      <div class="field"><label>Tên đăng nhập</label><input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." onkeydown="if(event.key==='Enter') attemptLogin();"></div>
       <div class="field"><label>Mật khẩu</label><input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') attemptLogin();"></div>
       <div id="loginError" style="color:var(--danger); font-size:12px; font-weight:700;"></div>
     </div>
@@ -381,11 +380,11 @@ async function sendDataToGoogleSheet(dataPayload) {
 }
 
 // -----------------------------------------------------
-// HỆ THỐNG PHÂN QUYỀN MỚI (KHÓA CHẶT 3 CẤP ĐỘ)
+// HỆ THỐNG PHÂN QUYỀN MỚI TỰ ĐỘNG TƯƠNG THÍCH CACHE CŨ
 // -----------------------------------------------------
 function isAuth(){ return currentUser !== null; }
-function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin'); }
-function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin'); }
+function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
+function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
 
 function attemptLogin(){
@@ -713,7 +712,7 @@ function renderListView(){
         ${cats.length ? `<select class="select-chip" onchange="filterCategory=this.value; render();"><option value="all">Tất cả hạng mục</option>${cOpts}</select>` : ''}
       </div>
     </div>
-    ${!currentUser ? `<div class="guest-banner">👁️ Bạn đang xem ở chế độ KHÁCH. Vui lòng bấm <b>"🔒 Đăng nhập"</b> ở góc phải để thêm mới hoặc cập nhật hồ sơ.</div>` : ''}
+    ${!currentUser ? `<div class="guest-banner">👁️ Chế độ KHÁCH. Vui lòng bấm <b>"🔒 Đăng nhập"</b> ở góc phải để thao tác.</div>` : ''}
     <div class="list-count"><span>Hiển thị ${totalCount} / ${scopedDocs().length} hồ sơ</span></div>
     ${bodyHtml}
   `;
