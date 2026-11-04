@@ -285,12 +285,23 @@
   <div class="modal-overlay" id="memberManageModal"><div class="modal" style="max-width:650px;">
     <div class="modal-head"><h3>Cấp Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:12px; color:var(--ink-light); margin:0;"><b>Admin (Quản lý):</b> Toàn quyền hệ thống. <b>Member (Thành viên):</b> Chỉ cập nhật tiến độ bản vẽ của mình.</p>
+      <p style="font-size:12px; color:var(--ink-light); margin:0;">
+        <b>👑 Quản trị (Super Admin):</b> Có mọi quyền + Quản lý nhân sự.<br>
+        <b>⭐ Trưởng nhóm (Manager):</b> Sửa/Duyệt mọi bản vẽ (Không quản lý NS).<br>
+        <b>👤 Thành viên (Member):</b> Chỉ cập nhật tiến độ bản vẽ của chính mình.
+      </p>
       
       <div class="field-row" style="margin-top:10px; background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end;">
         <div class="field"><label style="color:#fff;">Tên nhân sự mới</label><input type="text" id="newMemName" placeholder="VD: KS CÔNG"></div>
         <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Mặc định: 123"></div>
-        <div class="field"><label style="color:#fff;">Phân quyền</label><select id="newMemRole"><option value="member">👤 Thành viên</option><option value="admin">👑 Quản lý</option></select></div>
+        <div class="field">
+          <label style="color:#fff;">Phân quyền</label>
+          <select id="newMemRole">
+            <option value="member">👤 Thành viên</option>
+            <option value="manager">⭐ Trưởng nhóm</option>
+            <option value="superadmin">👑 Quản trị</option>
+          </select>
+        </div>
         <button class="btn btn-cyan" onclick="addMemberFromModal()" style="height:41px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; padding:0 16px;">＋ Tạo</button>
       </div>
       <div id="memberManageList" class="cat-list-manage" style="margin-top:16px;"></div>
@@ -320,7 +331,6 @@ const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzm
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', MEMBER_KEY = 'lhbimAccounts', ADMIN_SESSION_KEY = 'lhbimUser', ADMIN_PASSWORD = 'admin';
 
-// ĐÃ XÓA TẤT CẢ, CHỈ GIỮ LẠI ĐÚNG 2 TAB GỐC
 const TYPE_META = { 
   shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, 
   bienphap: { label:'Biện pháp thi công (MSS)', icon:'📋' } 
@@ -331,7 +341,7 @@ const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pen
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] }, accounts = []; 
 let settings = { defaultSla: 3 };
 let currentType = 'shopdrawing', currentView = 'docs', statsType = 'all', viewState = 'list';
-let planFilterType = 'all'; // Nút lựa chọn riêng cho phần Kế hoạch (all / shopdrawing / bienphap)
+let planFilterType = 'all'; 
 let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId = null;
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', sortMode = 'urgent';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
@@ -375,27 +385,48 @@ async function sendDataToGoogleSheet(dataPayload) {
   }
 }
 
+// -----------------------------------------------------
+// HỆ THỐNG PHÂN QUYỀN MỚI (ROLE-BASED ACCESS CONTROL)
+// -----------------------------------------------------
 function isAuth(){ return currentUser !== null; }
-function isAdmin(){ return currentUser && currentUser.role === 'admin'; }
+function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
+function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
-function openLoginModal(){ document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = ''; document.getElementById('loginError').innerText = ''; document.getElementById('loginModal').classList.add('open'); setTimeout(() => document.getElementById('loginUsername').focus(), 50); }
+
 function attemptLogin(){
   const u = document.getElementById('loginUsername').value.trim(), p = document.getElementById('loginPassword').value.trim();
-  if(u.toLowerCase() === 'admin' && p === ADMIN_PASSWORD) { currentUser = { name: 'Admin (Toàn quyền)', role: 'admin' }; } 
+  if(u.toLowerCase() === 'admin' && p === ADMIN_PASSWORD) { currentUser = { name: 'Admin (Hệ thống)', role: 'superadmin' }; } 
   else {
     const acc = accounts.find(a => a.name.toLowerCase() === u.toLowerCase() && a.pass === p);
     if(acc) { currentUser = { name: acc.name, role: acc.role || 'member' }; } else { document.getElementById('loginError').innerText = 'Sai tài khoản hoặc mật khẩu!'; return; }
   }
   sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser)); closeModal('loginModal'); render(); showToast(`Đăng nhập thành công!`);
 }
+
 function logout(){ currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); render(); showToast('Đã chuyển sang chế độ Khách'); }
+
 function renderAuthArea(){
   const wrap = document.getElementById('authArea');
   if(!currentUser) { wrap.innerHTML = `<div class="hero-badge" onclick="openLoginModal()">🔒 Đăng nhập</div>`; } 
-  else { const roleBadge = isAdmin() ? '👑 Quản lý' : '👤 ' + escapeHtml(currentUser.name); wrap.innerHTML = `<div class="admin-pill" style="cursor:pointer;" onclick="logout()"><span class="dot"></span> ${roleBadge} - Đăng xuất</div>`; }
+  else { 
+    let roleBadge = '👤 ' + escapeHtml(currentUser.name);
+    if(isSuperAdmin()) roleBadge = '👑 Quản trị';
+    else if(isManager()) roleBadge = '⭐ Trưởng nhóm';
+    wrap.innerHTML = `<div class="admin-pill" style="cursor:pointer;" onclick="logout()"><span class="dot"></span> ${roleBadge} - Đăng xuất</div>`; 
+  }
 }
-function canUpdateProgress(docAssignee) { if (isAdmin()) return true; if (isMember() && docAssignee) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } return false; }
-function requireAdminAction(){ if(!isAdmin()){ showToast('🔒 Vui lòng đăng nhập tài khoản Admin để thực hiện!'); return false; } return true; }
+
+function canUpdateProgress(docAssignee) { 
+  if (isManager()) return true; // Trưởng nhóm & Admin được sửa tất cả
+  if (isMember() && docAssignee) { // Member chỉ được sửa việc của mình
+    return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); 
+  } 
+  return false; 
+}
+
+function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
+function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
+// -----------------------------------------------------
 
 function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function saveCategories(){ localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
@@ -410,7 +441,12 @@ async function loadAll(){
   plans = safeJSON(localStorage.getItem(PLAN_KEY), plans);
   let loadedAcc = safeJSON(localStorage.getItem(MEMBER_KEY), []);
   if (loadedAcc.length === 0) {
-    loadedAcc = [{name: 'KS TƯỜNG', pass: '123', role: 'member'}, {name: 'KS DUY', pass: '123', role: 'member'}, {name: 'KS CÔNG', pass: '123', role: 'admin'}, {name: 'KS KHANG', pass: '123', role: 'member'}];
+    loadedAcc = [
+      {name: 'KS CÔNG', pass: '123', role: 'superadmin'}, 
+      {name: 'KS TƯỜNG', pass: '123', role: 'manager'}, 
+      {name: 'KS DUY', pass: '123', role: 'member'}, 
+      {name: 'KS KHANG', pass: '123', role: 'member'}
+    ];
   }
   accounts = loadedAcc;
 
@@ -654,7 +690,7 @@ function renderDocRow(d){
           ${r && r.approvedLink ? `<div style="margin-top:10px;"><a href="${escapeHtml(r.approvedLink)}" target="_blank" onclick="event.stopPropagation()" class="btn-download-file" style="background:var(--primary); color:#fff; border:none;">✅ Tải Bản Vẽ Duyệt (PDF)</a></div>` : (r && r.fileLink ? `<div style="margin-top:10px;"><a href="${escapeHtml(r.fileLink)}" target="_blank" onclick="event.stopPropagation()" class="btn-download-file">📎 Tải File Nộp Trình</a></div>` : '')}
         </div>
         ${canUpdateProgress(d.assignee) ? `<div class="doc-row-actions"><button class="btn btn-cyan btn-sm" onclick="event.stopPropagation(); openRoundModal('${d.id}')">Cập nhật tiến độ</button></div>` : ''}
-        ${isAdmin() ? `<div class="doc-row-actions" style="margin-left:4px;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openDocModal('${d.id}')">✎</button></div>` : ''}
+        ${isManager() ? `<div class="doc-row-actions" style="margin-left:4px;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openDocModal('${d.id}')">✎</button></div>` : ''}
       </div>
     </div>`;
 }
@@ -673,7 +709,8 @@ function renderListView(){
       <div class="toolbar-row1">
         <div class="search-box"><span>🔍</span><input type="text" id="searchInput" placeholder="Tìm mã, tên bản vẽ, người phụ trách..." value="${escapeHtml(searchTerm)}" oninput="searchTerm=this.value; render()"></div>
         <button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Lấy dữ liệu Sheet</button>
-        ${isAdmin() ? `<button class="btn btn-ghost" onclick="openMemberManageModal()">👥 NS</button><button class="btn btn-primary" onclick="openDocModal()">＋ Thêm mới</button>` : ''}
+        ${isSuperAdmin() ? `<button class="btn btn-ghost" onclick="openMemberManageModal()">👥 Quản lý NS</button>` : ''}
+        ${isManager() ? `<button class="btn btn-primary" onclick="openDocModal()">＋ Thêm mới</button>` : ''}
       </div>
       <div class="toolbar-row2">
         <div class="auto-sync-status" id="syncStatus">● Đồng bộ Real-time</div>
@@ -740,7 +777,7 @@ function renderDetailView(){
           ${d.desc ? `<div style="margin-top:6px; font-size:13.5px; color:var(--ink-light);">📝 Mô tả: ${escapeHtml(d.desc)}</div>` : ''}
         </div>
         <div style="display:flex; gap:8px; align-items:flex-start;">
-          ${isAdmin() ? `<button class="btn btn-ghost btn-sm" onclick="openDocModal('${d.id}')">✎ Sửa thông tin gốc</button>` : ''}
+          ${isManager() ? `<button class="btn btn-ghost btn-sm" onclick="openDocModal('${d.id}')">✎ Sửa thông tin gốc</button>` : ''}
           ${canUpdateProgress(d.assignee) ? `<button class="btn btn-cyan btn-sm" onclick="openRoundModal('${d.id}')">＋ Trình duyệt lần tiếp theo</button>` : ''}
         </div>
       </div>
@@ -755,7 +792,7 @@ function renderDetailView(){
   `;
 }
 
-// Tab 2: Kế hoạch (ĐÃ CÓ NÚT LỌC TÙY CHỌN: TẤT CẢ / SHOPDRAWING / BIỆN PHÁP)
+// Tab 2: Kế hoạch 
 function renderPlanView(){
   let sourcePlans = planFilterType === 'all' 
     ? [...(plans.shopdrawing || []), ...(plans.bienphap || [])]
@@ -803,7 +840,7 @@ function renderPlanView(){
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-cyan btn-sm" onclick="forceUpdateData()">🔄 Đồng bộ Sheet</button>
-        ${isAdmin() ? `<button class="btn btn-primary btn-sm" onclick="openPlanModal()">＋ Thêm KH rời</button>` : ''}
+        ${isManager() ? `<button class="btn btn-primary btn-sm" onclick="openPlanModal()">＋ Thêm KH rời</button>` : ''}
       </div>
     </div>
     <div class="kpi-grid">
@@ -878,7 +915,7 @@ function quickAddCategory(){
 }
 
 async function openDocModal(id, isPlanMode=false){
-  if(!requireAdminAction()) return;
+  if(!requireManagerAction()) return;
   editingDocId = id || null; const d = id ? (docs.find(x=>x.id===id) || {}) : {};
   document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : 'Thêm hồ sơ mới';
   document.getElementById('docCode').value = d.code||''; 
@@ -898,7 +935,7 @@ async function openDocModal(id, isPlanMode=false){
 
 async function saveDoc(){
   try {
-    if(!requireAdminAction()) return;
+    if(!requireManagerAction()) return;
     const codeEl = document.getElementById('docCode');
     const nameEl = document.getElementById('docName');
     const typeSelect = document.getElementById('docTypeSelect');
@@ -952,7 +989,7 @@ function openRoundModal(dId, rId){
   if(!d) { alert('Không tìm thấy hồ sơ bản vẽ này!'); return; }
 
   if(currentUser && !canUpdateProgress(d.assignee)) { 
-    alert(`Bản vẽ này do "${d.assignee}" phụ trách. Bạn hãy đăng nhập bằng tài khoản Admin hoặc "${d.assignee}" để cập nhật!`); 
+    alert(`Bản vẽ này do "${d.assignee}" phụ trách. Bạn hãy đăng nhập bằng tài khoản Quản trị, Trưởng nhóm hoặc "${d.assignee}" để cập nhật!`); 
     return; 
   }
   
@@ -1111,20 +1148,22 @@ async function saveRound(){
   }
 }
 
-// Quản lý Nhân sự & Kế hoạch rời
+// Quản lý Nhân sự 
 function openMemberManageModal(){
-  if(!requireAdminAction()) return;
+  if(!requireSuperAdminAction()) return;
   renderMemberManageList();
   document.getElementById('memberManageModal').classList.add('open');
 }
 function renderMemberManageList(){
   const wrap = document.getElementById('memberManageList');
-  wrap.innerHTML = accounts.map((a, idx) => `
+  wrap.innerHTML = accounts.map((a, idx) => {
+    let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐';
+    return `
     <div class="group-manage-item">
-      <div class="gname">${a.role==='admin'?'👑':'👤'} ${escapeHtml(a.name)} <span style="font-size:11px; color:var(--ink-light);">(MK: ${escapeHtml(a.pass)})</span></div>
+      <div class="gname">${icon} ${escapeHtml(a.name)} <span style="font-size:11px; color:var(--ink-light);">(MK: ${escapeHtml(a.pass)})</span></div>
       <button class="btn btn-danger btn-sm" onclick="deleteMember(${idx})">Xóa</button>
     </div>
-  `).join('');
+  `}).join('');
 }
 function addMemberFromModal(){
   const name = document.getElementById('newMemName').value.trim();
@@ -1144,7 +1183,7 @@ function deleteMember(idx){
 }
 
 function openPlanModal(){
-  if(!requireAdminAction()) return;
+  if(!requireManagerAction()) return;
   document.getElementById('planTitle').value = '';
   document.getElementById('planCode').value = '';
   document.getElementById('planDate').value = todayIso();
