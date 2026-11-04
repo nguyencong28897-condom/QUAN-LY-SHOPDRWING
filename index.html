@@ -285,13 +285,8 @@
   <div class="modal-overlay" id="memberManageModal"><div class="modal" style="max-width:650px;">
     <div class="modal-head"><h3>Cấp Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:12px; color:var(--ink-light); margin:0;">
-        <b>👑 Quản trị (Super Admin):</b> Có mọi quyền + Quản lý nhân sự.<br>
-        <b>⭐ Trưởng nhóm (Manager):</b> Sửa/Duyệt mọi bản vẽ (Không quản lý NS).<br>
-        <b>👤 Thành viên (Member):</b> Chỉ cập nhật tiến độ bản vẽ của chính mình.
-      </p>
       
-      <div class="field-row" style="margin-top:10px; background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end;">
+      <div class="field-row" style="background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end;">
         <div class="field"><label style="color:#fff;">Tên nhân sự mới</label><input type="text" id="newMemName" placeholder="VD: KS CÔNG"></div>
         <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Mặc định: 123"></div>
         <div class="field">
@@ -313,8 +308,8 @@
   <div class="modal-overlay" id="loginModal"><div class="modal" style="max-width:380px;">
     <div class="modal-head"><h3>🔒 Đăng nhập hệ thống</h3><button class="modal-close" onclick="closeModal('loginModal')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Tên đăng nhập (Tên nhân sự hoặc 'admin')</label><input type="text" id="loginUsername" onkeydown="if(event.key==='Enter') attemptLogin();"></div>
-      <div class="field"><label>Mật khẩu (Mặc định nhân sự: 123 / admin: admin)</label><input type="password" id="loginPassword" onkeydown="if(event.key==='Enter') attemptLogin();"></div>
+      <div class="field"><label>Tên đăng nhập</label><input type="text" id="loginUsername" placeholder="Nhập tên..." onkeydown="if(event.key==='Enter') attemptLogin();"></div>
+      <div class="field"><label>Mật khẩu</label><input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') attemptLogin();"></div>
       <div id="loginError" style="color:var(--danger); font-size:12px; font-weight:700;"></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('loginModal')">Hủy</button><button class="btn btn-primary" onclick="attemptLogin()">Đăng nhập</button></div>
@@ -386,16 +381,16 @@ async function sendDataToGoogleSheet(dataPayload) {
 }
 
 // -----------------------------------------------------
-// HỆ THỐNG PHÂN QUYỀN MỚI (ROLE-BASED ACCESS CONTROL)
+// HỆ THỐNG PHÂN QUYỀN MỚI (KHÓA CHẶT 3 CẤP ĐỘ)
 // -----------------------------------------------------
 function isAuth(){ return currentUser !== null; }
-function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
-function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
+function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin'); }
+function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin'); }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
 
 function attemptLogin(){
   const u = document.getElementById('loginUsername').value.trim(), p = document.getElementById('loginPassword').value.trim();
-  if(u.toLowerCase() === 'admin' && p === ADMIN_PASSWORD) { currentUser = { name: 'Admin (Hệ thống)', role: 'superadmin' }; } 
+  if(u.toLowerCase() === 'admin' && p === ADMIN_PASSWORD) { currentUser = { name: 'Admin', role: 'superadmin' }; } 
   else {
     const acc = accounts.find(a => a.name.toLowerCase() === u.toLowerCase() && a.pass === p);
     if(acc) { currentUser = { name: acc.name, role: acc.role || 'member' }; } else { document.getElementById('loginError').innerText = 'Sai tài khoản hoặc mật khẩu!'; return; }
@@ -417,8 +412,8 @@ function renderAuthArea(){
 }
 
 function canUpdateProgress(docAssignee) { 
-  if (isManager()) return true; // Trưởng nhóm & Admin được sửa tất cả
-  if (isMember() && docAssignee) { // Member chỉ được sửa việc của mình
+  if (isManager()) return true; 
+  if (isMember() && docAssignee) { 
     return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); 
   } 
   return false; 
@@ -718,7 +713,7 @@ function renderListView(){
         ${cats.length ? `<select class="select-chip" onchange="filterCategory=this.value; render();"><option value="all">Tất cả hạng mục</option>${cOpts}</select>` : ''}
       </div>
     </div>
-    ${!currentUser ? `<div class="guest-banner">👁️ Bạn đang xem ở chế độ KHÁCH. Bấm <b>"🔒 Đăng nhập"</b> ở góc trên bên phải (Tài khoản: <b>admin</b> / Mật khẩu: <b>admin</b>) để thêm mới hoặc cập nhật tiến độ.</div>` : ''}
+    ${!currentUser ? `<div class="guest-banner">👁️ Bạn đang xem ở chế độ KHÁCH. Vui lòng bấm <b>"🔒 Đăng nhập"</b> ở góc phải để thêm mới hoặc cập nhật hồ sơ.</div>` : ''}
     <div class="list-count"><span>Hiển thị ${totalCount} / ${scopedDocs().length} hồ sơ</span></div>
     ${bodyHtml}
   `;
@@ -1160,7 +1155,7 @@ function renderMemberManageList(){
     let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐';
     return `
     <div class="group-manage-item">
-      <div class="gname">${icon} ${escapeHtml(a.name)} <span style="font-size:11px; color:var(--ink-light);">(MK: ${escapeHtml(a.pass)})</span></div>
+      <div class="gname">${icon} ${escapeHtml(a.name)}</div>
       <button class="btn btn-danger btn-sm" onclick="deleteMember(${idx})">Xóa</button>
     </div>
   `}).join('');
@@ -1173,6 +1168,7 @@ function addMemberFromModal(){
   accounts.push({ name, pass, role });
   saveMembers();
   document.getElementById('newMemName').value = '';
+  document.getElementById('newMemPass').value = '';
   renderMemberManageList();
   showToast('Đã thêm nhân sự!');
 }
