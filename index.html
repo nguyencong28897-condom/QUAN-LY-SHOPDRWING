@@ -320,18 +320,18 @@ const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzm
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', MEMBER_KEY = 'lhbimAccounts', ADMIN_SESSION_KEY = 'lhbimUser', ADMIN_PASSWORD = 'admin';
 
-// BỔ SUNG THÊM TAB 'all' ĐỂ XEM TẤT CẢ CÙNG LÚC (SDS VÀ MSS)
+// ĐÃ XÓA TẤT CẢ, CHỈ GIỮ LẠI ĐÚNG 2 TAB GỐC
 const TYPE_META = { 
-  all: { label:'⚡ Tất Cả (SDS & MSS)', icon:'' },
-  shopdrawing: { label:'📐 Shopdrawing (SDS)', icon:'' }, 
-  bienphap: { label:'📋 Biện Pháp (MSS)', icon:'' } 
+  shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, 
+  bienphap: { label:'Biện pháp thi công', icon:'📋' } 
 };
 
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
 
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] }, accounts = []; 
 let settings = { defaultSla: 3 };
-let currentType = 'all', currentView = 'docs', statsType = 'all', viewState = 'list'; // Mặc định mở lên là xem "Tất cả"
+let currentType = 'shopdrawing', currentView = 'docs', statsType = 'all', viewState = 'list';
+let planFilterType = 'all'; // Nút lựa chọn riêng cho phần Kế hoạch (all / shopdrawing / bienphap)
 let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId = null;
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', sortMode = 'urgent';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
@@ -573,17 +573,10 @@ async function forceUpdateData(isAuto = false) {
   }, 500);
 }
 
-// Logic & Filters - ĐIỀU CHỈNH ĐỂ HIỂN THỊ TẤT CẢ KHI currentType === 'all'
 function docTypeGroups(type){ return groups[type] || []; }
 function groupById(type, id){ return docTypeGroups(type).find(g => g.id === id) || null; }
-function docTypeCategories(type){ 
-  if(currentType === 'all') return [...new Set([...categories.shopdrawing, ...categories.bienphap])];
-  return categories[type] || []; 
-}
-function scopedDocs(){ 
-  if(currentType === 'all') return docs;
-  return docs.filter(d => d.type === currentType); 
-}
+function docTypeCategories(type){ return categories[type] || []; }
+function scopedDocs(){ return docs.filter(d => d.type === currentType); }
 function sortedRounds(d){ return [...(d.rounds||[])].sort((a,b) => (a.roundNum||0) - (b.roundNum||0)); }
 function latestRound(d){ const s = sortedRounds(d); return s.length ? s[s.length-1] : null; }
 
@@ -617,7 +610,7 @@ function sortDocsInPlace(list){
 }
 function groupedDocs(){
   const list = filteredDocs();
-  return [{ key: '__all__', label: currentType === 'all' ? '⚡ Tất cả danh mục (SDS & MSS)' : TYPE_META[currentType].label, items: sortDocsInPlace(list) }];
+  return [{ key: '__all__', label: TYPE_META[currentType].label, items: sortDocsInPlace(list) }];
 }
 function toggleGroup(key){
   if(collapsedGroups.has(key)) collapsedGroups.delete(key); else collapsedGroups.add(key);
@@ -627,7 +620,7 @@ function toggleGroup(key){
 // System Rendering
 function render(){
   renderAuthArea(); 
-  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${t==='all'?docs.length:docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
+  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
   const list = scopedDocs();
   document.getElementById('heroStats').innerHTML = `<div class="hero-stat"><div class="num grad">${list.length}</div><div class="lbl">Tổng hồ sơ</div></div><div class="hero-stat"><div class="num grad">${list.reduce((s,d) => s + (d.rounds ? d.rounds.length : 0), 0)}</div><div class="lbl">Lượt trình</div></div><div class="hero-stat"><div class="num alert">${list.filter(isDocOverdue).length}</div><div class="lbl">🔴 Báo đỏ</div></div>`;
   const wrap = document.getElementById('appWrap');
@@ -640,18 +633,17 @@ function switchTab(t){ currentType = t; currentView = 'docs'; viewState = 'list'
 function switchView(v){ currentView = v; selectedPlans.clear(); render(); window.scrollTo(0,0); }
 function goBack(){ viewState = 'list'; selectedId = null; render(); }
 function goToDetail(id){ selectedId = id; viewState = 'detail'; render(); window.scrollTo(0,0); }
-function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = 'all'; currentView = 'docs'; goToDetail(id); } }
+function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = d.type; currentView = 'docs'; goToDetail(id); } }
 
 // Tab 1: Danh sách
 function renderDocRow(d){
   const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0;
   const is1Step = d.workflow === '1-buoc';
-  const typeBadge = d.type === 'bienphap' ? `<span class="tag" style="background:#854D0E; color:#FEF08A;">📋 MSS</span>` : `<span class="tag" style="background:#0369A1; color:#E0F2FE;">📐 SDS</span>`;
   return `
     <div class="doc-row ${od > 0 ? 'overdue' : ''}" onclick="goToDetail('${d.id}')">
       <div class="doc-row-top"><div class="stt">${d.stt}</div>
         <div class="doc-main">
-          <div class="doc-title-row">${typeBadge} <span class="doc-code">${escapeHtml(d.code || '---')}</span> <span class="doc-name">${escapeHtml(d.name)}</span></div>
+          <div class="doc-title-row"><span class="doc-code">${escapeHtml(d.code || '---')}</span> <span class="doc-name">${escapeHtml(d.name)}</span></div>
           <div class="doc-tag-row">
              ${d.category ? `<span class="tag cat-tag">${escapeHtml(d.category)}</span>` : ''} 
              ${is1Step ? `<span class="tag" style="background:#4F46E5; color:#fff;">⚡ Chỉ TVGS</span>` : ''}
@@ -671,7 +663,7 @@ function renderListView(){
   const cats = docTypeCategories(currentType), cOpts = cats.map(c => `<option value="${escapeHtml(c)}" ${filterCategory === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
   const groupedList = groupedDocs(), totalCount = groupedList.reduce((s,g) => s + g.items.length, 0);
 
-  let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào.</div>` : groupedList.map(g => {
+  let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào trong mục ${TYPE_META[currentType].label}.</div>` : groupedList.map(g => {
       const isC = collapsedGroups.has(g.key), odC = g.items.filter(isDocOverdue).length, rows = g.items.map(renderDocRow).join('');
       return `<div class="group-block"><div class="group-header ${isC ? 'collapsed' : ''}" onclick="toggleGroup('${escapeHtml(g.key)}')"><span class="group-name">${escapeHtml(g.label)}</span><span class="group-count">${g.items.length} hồ sơ</span> ${odC ? `<span class="group-overdue">🔴 ${odC}</span>` : ''}</div>${!isC ? `<div class="group-items">${rows}</div>` : ''}</div>`;
   }).join('');
@@ -763,10 +755,18 @@ function renderDetailView(){
   `;
 }
 
-// Tab 2: Kế hoạch
+// Tab 2: Kế hoạch (ĐÃ CÓ NÚT LỌC TÙY CHỌN: TẤT CẢ / SHOPDRAWING / BIỆN PHÁP)
 function renderPlanView(){
-  let allPlans = [...(plans[currentType] || [])]; 
-  docs.forEach(d => { if(d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { allPlans.push({ id: d.id, title: d.name, code: d.code, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); } });
+  let sourcePlans = planFilterType === 'all' 
+    ? [...(plans.shopdrawing || []), ...(plans.bienphap || [])]
+    : [...(plans[planFilterType] || [])];
+
+  let allPlans = [...sourcePlans]; 
+  docs.forEach(d => { 
+    if((planFilterType === 'all' || d.type === planFilterType) && d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { 
+      allPlans.push({ id: d.id, title: d.name, code: d.code, type: d.type, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); 
+    } 
+  });
   allPlans.sort((a,b) => (a.plannedDate||'').localeCompare(b.plannedDate||''));
   
   const states = allPlans.map(p => {
@@ -776,14 +776,16 @@ function renderPlanView(){
       return { p, s: { code, isDone, overdueVsPlan, daysLate: overdueVsPlan ? daysBetween(p.plannedDate, today) : 0, daysLeft: (!isDone && !overdueVsPlan && p.plannedDate) ? daysBetween(today, p.plannedDate) : 0 } };
   });
 
-  let bodyHtml = states.length === 0 ? `<div class="empty-state">Chưa có kế hoạch nào.</div>` : `<div class="doc-list">${states.map(({p,s}) => {
+  let bodyHtml = states.length === 0 ? `<div class="empty-state">Chưa có kế hoạch nào cho phần này.</div>` : `<div class="doc-list">${states.map(({p,s}) => {
       let stTag = s.isDone ? `<span class="tag status-approved">✅ Hoàn thành</span>` : s.overdueVsPlan ? `<span class="tag overdue-tag">🔴 Trễ ${s.daysLate} ngày</span>` : `<span class="tag status-none">Còn ${s.daysLeft} ngày</span>`;
+      const linkedDoc = p.linkedDocId ? docs.find(x => x.id === p.linkedDocId) : null;
+      const typeBadge = (linkedDoc ? linkedDoc.type : p.type) === 'bienphap' ? `<span class="tag" style="background:#854D0E; color:#FEF08A;">📋 MSS</span>` : `<span class="tag" style="background:#0369A1; color:#E0F2FE;">📐 SDS</span>`;
       return `
         <div class="doc-row ${s.overdueVsPlan?'overdue':''}" ${p.linkedDocId ? `onclick="goToDetailFromStats('${p.linkedDocId}')"` : ''}>
           <div class="doc-row-top" style="align-items:center;">
             <div class="stt">🗓️</div>
             <div class="doc-main">
-              <div style="font-weight:700; font-size:14.5px;">${p.code ? `<span class="doc-code">${escapeHtml(p.code)}</span> ` : ''}${escapeHtml(p.title)}</div>
+              <div style="font-weight:700; font-size:14.5px;">${typeBadge} ${p.code ? `<span class="doc-code">${escapeHtml(p.code)}</span> ` : ''}${escapeHtml(p.title)}</div>
               <div class="doc-tag-row" style="margin-top:6px;">${stTag} ${!s.isDone ? (s.code === 'dang-xu-ly' ? `<span class="tag status-pending">🔄 Đang trình TVGS</span>` : `<span class="tag status-none">Chưa nộp</span>`) : ''} ${p.linkedDocId ? `<span class="tag status-approved-note">🔗 Đã liên kết Hồ sơ</span>` : ''}</div>
               <div class="row-info-grid"><div class="info-cell"><div class="info-lbl">Nhân sự thực hiện</div><div class="info-val" style="color:var(--cyan);">${escapeHtml(p.assignee || 'Chưa gán')}</div></div><div class="info-cell"><div class="info-lbl">Hạn Kế hoạch</div><div class="info-val" style="${s.overdueVsPlan?'color:var(--danger);':''}">${fmtDate(p.plannedDate)}</div></div></div>
             </div>
@@ -793,14 +795,21 @@ function renderPlanView(){
   }).join('')}</div>`;
 
   return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; gap:6px;">
+        <button class="btn ${planFilterType==='all'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='all'; render();">⚡ Tất Cả Kế Hoạch</button>
+        <button class="btn ${planFilterType==='shopdrawing'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='shopdrawing'; render();">📐 Shopdrawing (SDS)</button>
+        <button class="btn ${planFilterType==='bienphap'?'btn-primary':'btn-ghost'} btn-sm" onclick="planFilterType='bienphap'; render();">📋 Biện Pháp (MSS)</button>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-cyan btn-sm" onclick="forceUpdateData()">🔄 Đồng bộ Sheet</button>
+        ${isAdmin() ? `<button class="btn btn-primary btn-sm" onclick="openPlanModal()">＋ Thêm KH rời</button>` : ''}
+      </div>
+    </div>
     <div class="kpi-grid">
       <div class="kpi-box"><div class="num">${states.length}</div><div class="lbl">Tổng Kế Hoạch</div></div>
       <div class="kpi-box"><div class="num" style="color:var(--green);">${states.filter(x=>x.s.isDone).length}</div><div class="lbl">Đã hoàn thành</div></div>
       <div class="kpi-box"><div class="num" style="color:var(--danger);">${states.filter(x=>x.s.overdueVsPlan).length}</div><div class="lbl">🔴 Đang trễ hạn</div></div>
-    </div>
-    <div class="toolbar-row1" style="margin-bottom:14px; background:var(--surface); padding:10px 14px; border-radius:12px; border:1px solid var(--border);">
-      <button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ Google Sheet</button>
-      ${isAdmin() ? `<button class="btn btn-primary" onclick="openPlanModal()">＋ Thêm KH rời</button>` : ''}
     </div>
     ${bodyHtml}
   `;
@@ -857,15 +866,14 @@ function renderStatsView(){
 
 // Hành động: Thêm / Sửa hồ sơ gốc
 function quickAddCategory(){
-  const targetTypeCat = currentType === 'all' ? 'shopdrawing' : currentType;
   const c = prompt("Nhập tên hạng mục mới:");
   if(c && c.trim()){
     const clean = c.trim();
-    if(!categories[targetTypeCat].includes(clean)){
-      categories[targetTypeCat].push(clean);
+    if(!categories[currentType].includes(clean)){
+      categories[currentType].push(clean);
       saveCategories();
     }
-    popSel('docCategory', categories[targetTypeCat].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —');
+    popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —');
   }
 }
 
@@ -878,7 +886,7 @@ async function openDocModal(id, isPlanMode=false){
   document.getElementById('docPlanDate').value = d.plannedDate||(isPlanMode?todayIso():''); 
   document.getElementById('docDesc').value = d.desc||'';
   
-  const targetTypeCat = d.type || (currentType === 'all' ? 'shopdrawing' : currentType);
+  const targetTypeCat = d.type || currentType;
   const typeSelect = document.getElementById('docTypeSelect');
   if(typeSelect) typeSelect.value = targetTypeCat;
 
@@ -899,7 +907,7 @@ async function saveDoc(){
     
     const codeVal = codeEl.value.trim();
     const nameVal = nameEl.value.trim();
-    const selectedDocType = typeSelect ? typeSelect.value : (currentType === 'all' ? 'shopdrawing' : currentType);
+    const selectedDocType = typeSelect ? typeSelect.value : currentType;
     const stableId = makeStableDocId(codeVal, nameVal);
 
     const py = { 
@@ -1153,7 +1161,7 @@ function savePlan(){
   const dateEl = document.getElementById('planDate');
   if(!titleEl.value.trim()){ titleEl.classList.add('error'); return; }
   if(!dateEl.value){ dateEl.classList.add('error'); return; }
-  const targetKey = currentType === 'all' ? 'shopdrawing' : currentType;
+  const targetKey = planFilterType === 'all' ? 'shopdrawing' : planFilterType;
   if(!plans[targetKey]) plans[targetKey] = [];
   plans[targetKey].push({
     id: uid(),
