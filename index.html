@@ -104,14 +104,31 @@
   .btn-download-file { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(56, 189, 248, 0.3); transition: all 0.2s ease; margin-top:10px; }
   .btn-download-file:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-  /* ĐÃ SỬA LỖI DÒNG NÀY ĐỂ TRANG WEB KHÔNG BỊ TRẮNG */
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); opacity: 0; background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; z-index: 200; pointer-events: none; transition: opacity 0.2s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .modal-head { padding: 16px 20px; background: linear-gradient(120deg, var(--blue-bg), var(--bg)); color: var(--ink); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border); }
+  .modal-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
+  .modal-close { cursor: pointer; background: var(--gray-bg); border: none; width: 26px; height: 26px; border-radius: 6px; color: var(--ink); font-weight: bold; }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink-light); margin-bottom: 4px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 13.5px; transition: 0.2s; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+  .field input.error, .field textarea.error { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2); background: rgba(248, 113, 113, 0.05); }
+  
+  .field-row { display: flex; gap: 10px; } .field-row .field { flex: 1; }
+  .cat-manage-row { display: flex; gap: 6px; } .cat-manage-row select { flex: 1; }
+  .approver-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+  .modal-foot { padding: 14px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
+  
+  /* LỖI ĐÃ ĐƯỢC FIX Ở ĐÂY: Bổ sung đoạn mã còn thiếu cho toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); opacity: 0; background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; z-index: 200; pointer-events: none; transition: opacity 0.2s; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
   
 </style>
 </head>
 <body>
 
-  <!-- PHẦN HEADER BÊN TRÊN -->
+  <!-- HEADER -->
   <div class="hero">
     <div class="hero-inner">
       <div class="hero-top">
@@ -122,7 +139,7 @@
             <h1>Shopdrawing & Biện pháp</h1>
           </div>
         </div>
-        <div class="hero-badge" id="theme-toggle">Chế độ Sáng / Tối</div>
+        <div class="hero-badge" id="theme-toggle">Sáng / Tối</div>
       </div>
       
       <div class="hero-stats">
@@ -134,12 +151,16 @@
           <div class="num alert">3</div>
           <div class="lbl">Đang trễ hạn</div>
         </div>
+        <div class="auto-sync-status">
+          <span style="font-size: 14px;">●</span> Đã kết nối Google Sheet
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- PHẦN THÂN TRANG WEB -->
+  <!-- NỘI DUNG CHÍNH -->
   <div class="shell">
+    
     <div class="tabs">
       <button class="tab-btn active">Tất cả <span class="tab-count">125</span></button>
       <button class="tab-btn">Chờ duyệt <span class="tab-count">12</span></button>
@@ -149,11 +170,12 @@
     <div class="toolbar">
       <div class="toolbar-row1">
         <div class="search-box">
-          <span style="font-size: 14px;">🔍</span>
+          <span>🔍</span>
           <input type="text" placeholder="Tìm mã bản vẽ, tên bản vẽ...">
         </div>
-        <select class="select-chip"><option>Hạng mục: Kết cấu</option></select>
-        <button class="btn btn-primary">Tải dữ liệu mới</button>
+        <select class="select-chip"><option>Hạng mục: Tất cả</option></select>
+        <button class="btn btn-primary" onclick="showToast('Đang tải dữ liệu mới nhất...')">Tải dữ liệu mới</button>
+        <button class="btn btn-cyan" onclick="openModal()">+ Thêm hồ sơ</button>
       </div>
     </div>
 
@@ -193,7 +215,7 @@
         </div>
       </div>
 
-      <!-- Hàng bản vẽ 2 (Bị trễ hạn) -->
+      <!-- Hàng bản vẽ 2 -->
       <div class="doc-row overdue">
         <div class="doc-row-top">
           <div class="stt">2</div>
@@ -228,8 +250,52 @@
     </div>
   </div>
 
+  <!-- POPUP (MODAL) THÊM HỒ SƠ -->
+  <div class="modal-overlay" id="myModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Thêm Hồ Sơ Mới</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Mã bản vẽ</label>
+            <input type="text" placeholder="VD: SDS-005">
+          </div>
+          <div class="field">
+            <label>Hạng mục</label>
+            <select><option>Shopdrawing</option><option>Biện pháp</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tên bản vẽ</label>
+          <input type="text" placeholder="Nhập tên bản vẽ...">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Người thực hiện</label>
+            <input type="text" placeholder="KS...">
+          </div>
+          <div class="field">
+            <label>Ngày trình</label>
+            <input type="date">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeModal()">Hủy</button>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Đã lưu thành công!')">Lưu hồ sơ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THÔNG BÁO TOAST -->
+  <div class="toast" id="myToast">Thông báo ở đây</div>
+
+  <!-- SCRIPT XỬ LÝ GIAO DIỆN -->
   <script>
-    // JS đơn giản để chuyển đổi Đen/Trắng
+    // Xử lý nút đổi Theme Sáng/Tối
     const toggleBtn = document.getElementById('theme-toggle');
     const htmlTag = document.documentElement;
 
@@ -240,6 +306,25 @@
         htmlTag.setAttribute('data-theme', 'dark');
       }
     });
+
+    // Xử lý bật/tắt Modal
+    function openModal() {
+      document.getElementById('myModal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('myModal').classList.remove('open');
+    }
+
+    // Xử lý thông báo Toast
+    function showToast(message) {
+      const toast = document.getElementById('myToast');
+      toast.innerText = message;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 3000);
+    }
   </script>
+
 </body>
 </html>
