@@ -1085,3 +1085,166 @@ async function saveRound(){
     if(!submitDateEl.value){ alert('Vui lòng chọn Ngày trình!'); submitDateEl.classList.add('error'); submitDateEl.focus(); return; }
     
     const fileLinkEl = document.getElementById('roundFileLink');
+    if(!fileLinkEl.value.trim()){ alert('Vui lòng nhập Link file hồ sơ nộp trình!'); fileLinkEl.classList.add('error'); fileLinkEl.focus(); return; }
+    
+    const resBlock = document.getElementById('resolutionBlock'), resInputEl = document.getElementById('roundResolution');
+    if(resBlock.style.display === 'block' && resBlock.dataset.required === 'true' && !resInputEl.value.trim()) { 
+      alert('Bản vẽ lần trước có ý kiến chỉnh sửa. Vui lòng nhập Nội dung giải trình / Biện pháp khắc phục!'); 
+      resInputEl.classList.add('error'); resInputEl.focus(); return; 
+    }
+    
+    const slaVal = parseInt(document.getElementById('roundSla').value) || 3;
+    const deadlineIso = addDays(submitDateEl.value, slaVal);
+
+    let rNum = (d.rounds ? d.rounds.length : 0) + 1;
+    if (editingRoundId) {
+      const existingR = d.rounds.find(x => x.id === editingRoundId);
+      if (existingR && existingR.roundNum) rNum = existingR.roundNum;
+    }
+
+    const nd = { 
+      id: editingRoundId || `${d.id}_r_${rNum}`,
+      roundNum: rNum,
+      submitDate: submitDateEl.value,
+      deadline: deadlineIso,
+      slaDays: slaVal, 
+      fileLink: fileLinkEl.value.trim(),
+      rfiLink: document.getElementById('roundRfiLink').value.trim(), 
+      resolutionNote: resInputEl.value.trim(),
+      approvedLink: document.getElementById('roundApprovedLink').value.trim(),
+      tvgsStatus: document.getElementById('tvgsStatus').value,
+      tvgsDate: document.getElementById('tvgsDate').value,
+      tvgsLink: document.getElementById('tvgsLink').value.trim(), 
+      bqlStatus: (d.workflow === '1-buoc') ? document.getElementById('tvgsStatus').value : document.getElementById('bqlStatus').value,
+      bqlDate: document.getElementById('bqlDate').value,
+      bqlLink: document.getElementById('bqlLink').value.trim(), 
+      note: document.getElementById('roundNote').value.trim(),
+      createdAt: rNum
+    };
+    
+    if(editingRoundId) {
+      const idx = d.rounds.findIndex(x => x.id === editingRoundId);
+      if (idx > -1) d.rounds[idx] = { ...d.rounds[idx], ...nd };
+      else d.rounds.push(nd);
+    } else {
+      if(!d.rounds) d.rounds = [];
+      d.rounds.push(nd);
+    }
+    
+    saveDocs();
+
+    const apiPayload = {
+      action: 'saveRound',
+      stt: d.stt,
+      code: d.code,
+      name: d.name,
+      category: d.category,
+      assignee: d.assignee,
+      desc: d.desc,
+      workflow: d.workflow,
+      plannedDate: d.plannedDate,
+      docType: d.type || 'shopdrawing',
+      ...nd
+    };
+    
+    const btn = document.getElementById('btnSaveRound');
+    btn.innerText = "⏳ Đang đồng bộ lên Google Sheet..."; btn.disabled = true;
+    const isSuccess = await sendDataToGoogleSheet(apiPayload);
+    btn.innerText = "💾 Lưu (Đồng bộ Google Sheet)"; btn.disabled = false;
+    
+    closeModal('roundModal');
+    currentView = 'docs'; viewState = 'detail'; selectedId = d.id;
+    render(); 
+    
+    if (isSuccess) {
+      showToast('✅ Đã lưu và đồng bộ lên Google Sheet thành công!');
+    } else {
+      alert('⚠️ Đã lưu trên trình duyệt nhưng CHƯA GỬI ĐƯỢC LÊN GOOGLE SHEET.\nHãy chắc chắn bạn đã cập nhật Apps Script (Chọn New Version -> Deploy)!');
+    }
+
+  } catch (err) {
+    alert("❌ LỖI HỆ THỐNG KHI LƯU:\n" + err.message);
+  }
+}
+
+// Quản lý Nhân sự 
+function openMemberManageModal(){
+  if(!requireSuperAdminAction()) return;
+  renderMemberManageList();
+  document.getElementById('memberManageModal').classList.add('open');
+}
+function renderMemberManageList(){
+  const wrap = document.getElementById('memberManageList');
+  wrap.innerHTML = accounts.map((a, idx) => {
+    let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐';
+    return `
+    <div class="group-manage-item">
+      <div class="gname">${icon} ${escapeHtml(a.name)}</div>
+      <button class="btn btn-danger btn-sm" onclick="deleteMember(${idx})">Xóa</button>
+    </div>
+  `}).join('');
+}
+function addMemberFromModal(){
+  const name = document.getElementById('newMemName').value.trim();
+  const pass = document.getElementById('newMemPass').value.trim() || '123';
+  const role = document.getElementById('newMemRole').value;
+  if(!name) { alert("Vui lòng nhập tên nhân sự!"); return; }
+  accounts.push({ name, pass, role });
+  saveMembers();
+  document.getElementById('newMemName').value = '';
+  document.getElementById('newMemPass').value = '';
+  renderMemberManageList();
+  showToast('Đã thêm nhân sự!');
+}
+function deleteMember(idx){
+  accounts.splice(idx, 1);
+  saveMembers();
+  renderMemberManageList();
+}
+
+function openPlanModal(){
+  if(!requireManagerAction()) return;
+  document.getElementById('planTitle').value = '';
+  document.getElementById('planCode').value = '';
+  document.getElementById('planDate').value = todayIso();
+  popSel('planAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), '', '— Chọn nhân sự —');
+  popSel('planLinkedDoc', docs.map(d=>({val:d.id, lbl:`[${d.type==='bienphap'?'MSS':'SDS'}] ${d.code} - ${d.name}`})), '', '— Không liên kết —');
+  document.getElementById('planModal').classList.add('open');
+}
+function togglePlanManualStatus(){
+  const val = document.getElementById('planLinkedDoc').value;
+  document.getElementById('planManualStatusField').style.display = val ? 'none' : 'block';
+}
+function savePlan(){
+  const titleEl = document.getElementById('planTitle');
+  const dateEl = document.getElementById('planDate');
+  if(!titleEl.value.trim()){ titleEl.classList.add('error'); return; }
+  if(!dateEl.value){ dateEl.classList.add('error'); return; }
+  const targetKey = planFilterType === 'all' ? 'shopdrawing' : planFilterType;
+  if(!plans[targetKey]) plans[targetKey] = [];
+  plans[targetKey].push({
+    id: uid(),
+    title: titleEl.value.trim(),
+    code: document.getElementById('planCode').value.trim(),
+    plannedDate: dateEl.value,
+    assignee: document.getElementById('planAssignee').value,
+    linkedDocId: document.getElementById('planLinkedDoc').value,
+    manualStatus: document.getElementById('planManualStatus').value
+  });
+  savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
+}
+
+// Khởi chạy ứng dụng
+window.onload = async function() { 
+  try { 
+    await loadAll(); 
+  } catch(err) { 
+    console.error(err); 
+    loadFromLocalStorage(); 
+  } finally { 
+    render(); 
+  } 
+};
+</script>
+</body>
+</html>
