@@ -31,6 +31,51 @@
   * { box-sizing: border-box; } 
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Manrope', sans-serif; min-height: 100vh; transition: background 0.3s, color 0.3s; }
   
+  /* ================= CSS MÀN HÌNH ĐĂNG NHẬP CHÍNH (GIAO DIỆN DARK + LED RGB) ================= */
+  .full-page-login { position: fixed; inset: 0; background: linear-gradient(120deg, #0F172A 0%, #0B0F19 50%, #111827 100%); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; font-family: 'Manrope', sans-serif; }
+  
+  /* Hiệu ứng LED RGB */
+  .login-card-wrapper { position: relative; border-radius: 20px; z-index: 1; width: 100%; max-width: 420px; }
+  .login-card-wrapper::before {
+    content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 400%; z-index: -1; border-radius: 22px;
+    animation: rgbGlow 12s linear infinite;
+    filter: blur(5px); /* Làm nhòe viền sáng cho mượt */
+  }
+  @keyframes rgbGlow {
+    0% { background-position: 0 0; }
+    50% { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+  }
+
+  /* Khung đăng nhập nhám đen */
+  .login-card { background: var(--surface); border-radius: 18px; padding: 40px 32px; position: relative; z-index: 2; border: 1px solid rgba(255,255,255,0.05); }
+  
+  .login-logo { text-align: center; margin-bottom: 24px; }
+  .login-logo-text { font-size: 46px; font-weight: 800; color: #fff; letter-spacing: -2px; margin-bottom: 4px; line-height: 1; text-shadow: 0 0 15px var(--primary); }
+  .login-logo-text span { color: var(--cyan); }
+  .login-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; text-align: center; }
+  .login-subtitle { font-size: 13px; color: var(--ink-light); margin-bottom: 24px; font-weight: 600; text-align: center; }
+  
+  .login-alert { background: rgba(248, 113, 113, 0.1); color: #FCA5A5; padding: 14px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 24px; display: none; border: 1px solid rgba(248, 113, 113, 0.3); text-align: center;}
+  
+  .login-field { margin-bottom: 20px; }
+  .login-field label { display: block; font-size: 12px; font-weight: 800; color: var(--ink-light); margin-bottom: 8px; }
+  .login-input-wrap { position: relative; }
+  .login-input-wrap input { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; transition: 0.2s; outline: none; background: rgba(0,0,0,0.2); color: #fff; font-weight: 600; }
+  .login-input-wrap input:focus { border-color: var(--cyan); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15); }
+  .login-eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--ink-light); background: none; border: none; font-size: 18px; outline: none; }
+  
+  .btn-login-main { width: 100%; background: linear-gradient(120deg, var(--primary), #1E4FE0); color: #fff; border: none; border-radius: 8px; padding: 16px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 10px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
+  .btn-login-main:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4); }
+  .btn-login-main:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+  
+  .login-footer { margin-top: 24px; font-size: 12.5px; font-weight: 700; text-align: center; }
+  .login-footer a { color: var(--cyan); text-decoration: none; transition: 0.2s; }
+  .login-footer a:hover { color: #fff; text-shadow: 0 0 5px var(--cyan); }
+
+  /* ================= CSS APP CHÍNH ================= */
   .hero { position: relative; background: linear-gradient(120deg, #0F172A 0%, #1E293B 50%, #334155 100%); padding: 25px 32px 35px; overflow: hidden; color: #fff; }
   .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 85% 15%, rgba(23,195,232,0.3), transparent 40%); pointer-events: none; }
   .hero-inner { position: relative; max-width: 1220px; margin: 0 auto; }
@@ -170,259 +215,289 @@
 </head>
 <body data-theme="dark">
 
-  <div class="hero">
-    <div class="hero-inner">
-      <div class="hero-top">
-        <div class="brand">
-          <div class="brand-mark">SD/BP</div>
-          <div class="brand-text"><div class="eyebrow">NCC · Quản lý trình duyệt</div><h1>Shopdrawing & Biện pháp</h1></div>
+  <!-- ================= MÀN HÌNH ĐĂNG NHẬP (GATEKEEPER - CÓ LED RGB) ================= -->
+  <div id="fullPageLogin" class="full-page-login">
+    <div class="login-card-wrapper">
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="login-logo-text">N<span>CC</span></div>
+          <div style="font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase;">Quản lý trình duyệt</div>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <button class="btn btn-ghost" onclick="toggleTheme()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:16px; padding:6px 10px;" title="Đổi giao diện Ngày/Đêm">🌙</button>
-          <div class="auth-area" id="authArea"></div>
+        
+        <div class="login-title">Đăng nhập hệ thống</div>
+        <div class="login-subtitle">Không chia sẻ thông tin đăng nhập với bất kỳ ai.</div>
+        
+        <div id="mainLoginAlert" class="login-alert">Vui lòng đăng nhập để tiếp tục.</div>
+        
+        <div class="login-field">
+          <label>Tên Đăng Nhập (ID)</label>
+          <div class="login-input-wrap">
+            <input type="text" id="mainLoginUser" placeholder="Nhập ID tài khoản..." onkeydown="if(event.key==='Enter') executeMainLogin();" autocomplete="off">
+          </div>
+        </div>
+        
+        <div class="login-field">
+          <label>Mật Khẩu</label>
+          <div class="login-input-wrap">
+            <input type="password" id="mainLoginPass" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') executeMainLogin();">
+            <button class="login-eye" onclick="toggleMainPassword()" tabindex="-1" title="Hiện/Ẩn mật khẩu">👁️</button>
+          </div>
+        </div>
+        
+        <button id="btnMainLogin" class="btn-login-main" onclick="executeMainLogin()">Đăng nhập an toàn</button>
+        
+        <div class="login-footer">
+          <a href="#" onclick="alert('Vui lòng liên hệ Trưởng nhóm hoặc Ban quản trị để được cấp tài khoản hệ thống.')">← Trợ giúp đăng nhập</a>
         </div>
       </div>
-      <div class="hero-stats" id="heroStats"></div>
     </div>
   </div>
 
-  <div class="shell">
-    <div class="tabs" id="tabsWrap"></div>
-    <div id="appWrap"></div>
-  </div>
-
-  <!-- LỚP PHỦ LIGHTBOX ĐỂ ZOOM ẢNH -->
-  <div class="image-lightbox" id="imageLightbox" onclick="closeLightbox()">
-    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
-    <img src="" id="lightboxImg" onclick="event.stopPropagation()">
-  </div>
-
-  <!-- MODAL: HỒ SƠ GỐC -->
-  <div class="modal-overlay" id="docModal"><div class="modal">
-    <div class="modal-head"><h3 id="docModalTitle">Thêm Bản vẽ / Kế hoạch</h3><button class="modal-close" onclick="closeModal('docModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Mã số bản vẽ *</label><input type="text" id="docCode" placeholder="VD: SDS-001 hoặc MSS-01" oninput="this.classList.remove('error')"></div>
-      <div class="field-row">
-        <div class="field"><label>Loại (Shopdrawing / Biện pháp)</label>
-          <select id="docTypeSelect">
-            <option value="shopdrawing">📐 Shopdrawing (SDS)</option>
-            <option value="bienphap">📋 Biện pháp thi công (MSS)</option>
-          </select>
-        </div>
-        <div class="field"><label>Hạng mục</label><div class="cat-manage-row"><select id="docCategory"></select><button type="button" class="btn btn-ghost btn-sm" onclick="quickAddCategory()">＋</button></div></div>
-      </div>
-      <div class="field"><label>Tên bản vẽ / biện pháp *</label><input type="text" id="docName" oninput="this.classList.remove('error')"></div>
-      <div class="field-row">
-        <div class="field"><label>Nhân sự thực hiện</label><div class="cat-manage-row"><select id="docAssignee"></select></div></div>
-        <div class="field">
-          <label>Quy trình trình duyệt *</label>
-          <select id="docWorkflow">
-            <option value="2-buoc">2 Bước (TVGS + Ban Quản Lý)</option>
-            <option value="1-buoc">1 Bước (Chỉ TVGS)</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-            <label>Ngày Kế hoạch xong <button type="button" class="btn-date-quick" onclick="document.getElementById('docPlanDate').value = todayIso()">Hôm nay</button></label>
-            <input type="date" id="docPlanDate">
-        </div>
-        <div class="field"><label>Ghi chú / Mô tả</label><input type="text" id="docDesc"></div>
-      </div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('docModal')">Hủy</button><button class="btn btn-primary" id="btnSaveDoc" onclick="saveDoc()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
-  </div></div>
-
-  <!-- MODAL: VÒNG TRÌNH DUYỆT -->
-  <div class="modal-overlay" id="roundModal"><div class="modal">
-    <div class="modal-head"><h3 id="roundModalTitle">Cập nhật vòng trình</h3><button class="modal-close" onclick="closeModal('roundModal')">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="roundDocIdHidden">
-      <div class="field-row">
-        <div class="field">
-            <label>Ngày trình * <button type="button" class="btn-date-quick" onclick="document.getElementById('roundSubmitDate').value = todayIso(); document.getElementById('roundSubmitDate').classList.remove('error');">Hôm nay</button></label>
-            <input type="date" id="roundSubmitDate" oninput="this.classList.remove('error')">
-        </div>
-        <div class="field"><label>SLA (Số ngày hạn phản hồi)</label><input type="number" id="roundSla" value="3"></div>
-      </div>
-
-      <div id="resolutionBlock" style="display:none; background:rgba(245,158,11,0.1); border:1px dashed var(--amber); padding:12px; border-radius:8px; margin-bottom:12px;">
-        <div style="font-size:12px; font-weight:800; color:var(--amber); margin-bottom:6px;">⚠️ Yêu cầu giải trình comment từ lần nộp trước:</div>
-        <div id="prevCommentText" style="font-size:12.5px; color:var(--ink-light); font-style:italic; margin-bottom:10px; padding-left:10px; border-left:2px solid var(--amber);"></div>
-        <div class="field">
-          <label style="color:var(--amber);">Nội dung giải trình / Biện pháp khắc phục *</label>
-          <textarea id="roundResolution" rows="2" placeholder="Ví dụ: Đã sửa lại chi tiết thép..." oninput="this.classList.remove('error')"></textarea>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Link file hồ sơ nộp trình (PDF/CAD) *</label>
-        <input type="text" id="roundFileLink" placeholder="Dán link Google Drive bản vẽ..." oninput="this.classList.remove('error')">
-      </div>
-
-      <div class="field">
-        <label>Link Công văn / RFI (Nếu có yêu cầu thay đổi bản vẽ)</label>
-        <input type="text" id="roundRfiLink" placeholder="Link Drive chứa RFI/Công văn (hoặc ghi 'không')...">
-      </div>
-
-      <div class="approver-block"><div style="font-size:12px; font-weight:800; color:var(--primary);">🧭 Tư vấn giám sát (TVGS)</div>
-        <div class="field-row">
-            <div class="field"><select id="tvgsStatus"><option value="cho-duyet">Đang chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
-            <div class="field" style="position:relative;">
-                <input type="date" id="tvgsDate" title="Ngày TVGS phản hồi" style="padding-right: 75px;">
-                <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:6px;" onclick="document.getElementById('tvgsDate').value = todayIso()">Hôm nay</button>
+  <!-- ================= TOÀN BỘ APP CHÍNH (BỊ ẨN KHI CHƯA LOGIN) ================= -->
+  <div id="mainAppWrapper" style="display: none;">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-top">
+            <div class="brand">
+              <div class="brand-mark">SD/BP</div>
+              <div class="brand-text"><div class="eyebrow">NCC · Quản lý trình duyệt</div><h1>Shopdrawing & Biện pháp</h1></div>
             </div>
-        </div>
-        <div class="field" style="margin-top:8px;"><input type="text" id="tvgsLink" placeholder="Link văn bản phản hồi của TVGS..."></div>
-      </div>
-      
-      <div class="approver-block" id="bqlApprovalBlock"><div style="font-size:12px; font-weight:800; color:var(--primary);">🏢 Ban quản lý (BQL)</div>
-        <div class="field-row">
-            <div class="field"><select id="bqlStatus"><option value="cho-duyet">Đang chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
-            <div class="field" style="position:relative;">
-                <input type="date" id="bqlDate" title="Ngày BQL phản hồi" style="padding-right: 75px;">
-                <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:6px;" onclick="document.getElementById('bqlDate').value = todayIso()">Hôm nay</button>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <!-- Nút đổi theme tạm ẩn vì dùng full Dark Mode cho đồng bộ, nếu bạn muốn mở lại thì bỏ comment đoạn dưới -->
+              <!-- <button class="btn btn-ghost" onclick="toggleTheme()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:16px; padding:6px 10px;" title="Đổi giao diện Ngày/Đêm">🌙</button> -->
+              <div class="auth-area" id="authArea"></div>
             </div>
+          </div>
+          <div class="hero-stats" id="heroStats"></div>
         </div>
-        <div class="field" style="margin-top:8px;"><input type="text" id="bqlLink" placeholder="Link văn bản phản hồi của BQL..."></div>
       </div>
+
+      <div class="shell">
+        <div class="tabs" id="tabsWrap"></div>
+        <div id="appWrap"></div>
+      </div>
+
+      <!-- LỚP PHỦ LIGHTBOX ĐỂ ZOOM ẢNH -->
+      <div class="image-lightbox" id="imageLightbox" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+        <img src="" id="lightboxImg" onclick="event.stopPropagation()">
+      </div>
+
+      <!-- MODAL: HỒ SƠ GỐC -->
+      <div class="modal-overlay" id="docModal"><div class="modal">
+        <div class="modal-head"><h3 id="docModalTitle">Thêm Bản vẽ / Kế hoạch</h3><button class="modal-close" onclick="closeModal('docModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Mã số bản vẽ *</label><input type="text" id="docCode" placeholder="VD: SDS-001 hoặc MSS-01" oninput="this.classList.remove('error')"></div>
+          <div class="field-row">
+            <div class="field"><label>Loại (Shopdrawing / Biện pháp)</label>
+              <select id="docTypeSelect">
+                <option value="shopdrawing">📐 Shopdrawing (SDS)</option>
+                <option value="bienphap">📋 Biện pháp thi công (MSS)</option>
+              </select>
+            </div>
+            <div class="field"><label>Hạng mục</label><div class="cat-manage-row"><select id="docCategory"></select><button type="button" class="btn btn-ghost btn-sm" onclick="quickAddCategory()">＋</button></div></div>
+          </div>
+          <div class="field"><label>Tên bản vẽ / biện pháp *</label><input type="text" id="docName" oninput="this.classList.remove('error')"></div>
+          <div class="field-row">
+            <div class="field"><label>Nhân sự thực hiện</label><div class="cat-manage-row"><select id="docAssignee"></select></div></div>
+            <div class="field">
+              <label>Quy trình trình duyệt *</label>
+              <select id="docWorkflow">
+                <option value="2-buoc">2 Bước (TVGS + Ban Quản Lý)</option>
+                <option value="1-buoc">1 Bước (Chỉ TVGS)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+                <label>Ngày Kế hoạch xong <button type="button" class="btn-date-quick" onclick="document.getElementById('docPlanDate').value = todayIso()">Hôm nay</button></label>
+                <input type="date" id="docPlanDate">
+            </div>
+            <div class="field"><label>Ghi chú / Mô tả</label><input type="text" id="docDesc"></div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('docModal')">Hủy</button><button class="btn btn-primary" id="btnSaveDoc" onclick="saveDoc()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
+      </div></div>
+
+      <!-- MODAL: VÒNG TRÌNH DUYỆT -->
+      <div class="modal-overlay" id="roundModal"><div class="modal">
+        <div class="modal-head"><h3 id="roundModalTitle">Cập nhật vòng trình</h3><button class="modal-close" onclick="closeModal('roundModal')">✕</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="roundDocIdHidden">
+          <div class="field-row">
+            <div class="field">
+                <label>Ngày trình * <button type="button" class="btn-date-quick" onclick="document.getElementById('roundSubmitDate').value = todayIso(); document.getElementById('roundSubmitDate').classList.remove('error');">Hôm nay</button></label>
+                <input type="date" id="roundSubmitDate" oninput="this.classList.remove('error')">
+            </div>
+            <div class="field"><label>SLA (Số ngày hạn phản hồi)</label><input type="number" id="roundSla" value="3"></div>
+          </div>
+
+          <div id="resolutionBlock" style="display:none; background:rgba(245,158,11,0.1); border:1px dashed var(--amber); padding:12px; border-radius:8px; margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:800; color:var(--amber); margin-bottom:6px;">⚠️ Yêu cầu giải trình comment từ lần nộp trước:</div>
+            <div id="prevCommentText" style="font-size:12.5px; color:var(--ink-light); font-style:italic; margin-bottom:10px; padding-left:10px; border-left:2px solid var(--amber);"></div>
+            <div class="field">
+              <label style="color:var(--amber);">Nội dung giải trình / Biện pháp khắc phục *</label>
+              <textarea id="roundResolution" rows="2" placeholder="Ví dụ: Đã sửa lại chi tiết thép..." oninput="this.classList.remove('error')"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Link file hồ sơ nộp trình (PDF/CAD) *</label>
+            <input type="text" id="roundFileLink" placeholder="Dán link Google Drive bản vẽ..." oninput="this.classList.remove('error')">
+          </div>
+
+          <div class="field">
+            <label>Link Công văn / RFI (Nếu có yêu cầu thay đổi bản vẽ)</label>
+            <input type="text" id="roundRfiLink" placeholder="Link Drive chứa RFI/Công văn (hoặc ghi 'không')...">
+          </div>
+
+          <div class="approver-block"><div style="font-size:12px; font-weight:800; color:var(--primary);">🧭 Tư vấn giám sát (TVGS)</div>
+            <div class="field-row">
+                <div class="field"><select id="tvgsStatus"><option value="cho-duyet">Đang chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
+                <div class="field" style="position:relative;">
+                    <input type="date" id="tvgsDate" title="Ngày TVGS phản hồi" style="padding-right: 75px;">
+                    <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:6px;" onclick="document.getElementById('tvgsDate').value = todayIso()">Hôm nay</button>
+                </div>
+            </div>
+            <div class="field" style="margin-top:8px;"><input type="text" id="tvgsLink" placeholder="Link văn bản phản hồi của TVGS..."></div>
+          </div>
+          
+          <div class="approver-block" id="bqlApprovalBlock"><div style="font-size:12px; font-weight:800; color:var(--primary);">🏢 Ban quản lý (BQL)</div>
+            <div class="field-row">
+                <div class="field"><select id="bqlStatus"><option value="cho-duyet">Đang chờ duyệt</option><option value="da-duyet">Đã duyệt</option><option value="duyet-ghi-chu">Duyệt có ghi chú</option><option value="khong-duyet">Không duyệt</option></select></div>
+                <div class="field" style="position:relative;">
+                    <input type="date" id="bqlDate" title="Ngày BQL phản hồi" style="padding-right: 75px;">
+                    <button type="button" class="btn-date-quick" style="position:absolute; right:6px; top:6px;" onclick="document.getElementById('bqlDate').value = todayIso()">Hôm nay</button>
+                </div>
+            </div>
+            <div class="field" style="margin-top:8px;"><input type="text" id="bqlLink" placeholder="Link văn bản phản hồi của BQL..."></div>
+          </div>
+          
+          <div class="field"><label>Ghi chú / Nhận xét của TVGS & BQL</label><textarea id="roundNote" rows="2"></textarea></div>
+
+          <div class="field" style="margin-top:10px; border-top:1px dashed var(--border); padding-top:12px;">
+            <label style="color:var(--green);">Link bản vẽ ĐÃ DUYỆT CUỐI CÙNG (PDF)</label>
+            <input type="text" id="roundApprovedLink" placeholder="Chỉ nhập khi TVGS/BQL đã chốt bản cuối cùng...">
+          </div>
+
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('roundModal')">Hủy</button><button class="btn btn-cyan" id="btnSaveRound" onclick="saveRound()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
+      </div></div>
+
+      <!-- MODAL: KẾ HOẠCH RỜI -->
+      <div class="modal-overlay" id="planModal"><div class="modal">
+        <div class="modal-head"><h3 id="planModalTitle">Mục kế hoạch (Thủ công)</h3><button class="modal-close" onclick="closeModal('planModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Tên công việc / Bản vẽ *</label><input type="text" id="planTitle" oninput="this.classList.remove('error')"></div>
+          <div class="field-row">
+            <div class="field"><label>Mã tham chiếu</label><input type="text" id="planCode"></div>
+            <div class="field">
+                <label>Ngày duyệt xong * <button type="button" class="btn-date-quick" onclick="document.getElementById('planDate').value = todayIso(); document.getElementById('planDate').classList.remove('error');">Hôm nay</button></label>
+                <input type="date" id="planDate" oninput="this.classList.remove('error')">
+            </div>
+          </div>
+          <div class="field"><label>Nhân sự thực hiện</label><select id="planAssignee"></select></div>
+          <div class="field"><label>Link với Hồ sơ có sẵn</label><select id="planLinkedDoc" onchange="togglePlanManualStatus()"></select></div>
+          <div class="field" id="planManualStatusField"><label>Trạng thái ảo</label><select id="planManualStatus"><option value="chua-trinh">Chưa trình</option><option value="dang-xu-ly">Đang chờ duyệt</option><option value="hoan-thanh">Đã duyệt xong</option></select></div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('planModal')">Hủy</button><button class="btn btn-primary" onclick="savePlan()">💾 Lưu</button></div>
+      </div></div>
+
+      <!-- MODAL: QUẢN LÝ TÀI KHOẢN (CÓ THÊM QUYỀN KHÁCH) -->
+      <div class="modal-overlay" id="memberManageModal"><div class="modal" style="max-width:700px;">
+        <div class="modal-head"><h3>Quản lý Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field-row" style="background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="field"><label style="color:#fff;">Tên đăng nhập (ID)</label><input type="text" id="newMemUsername" placeholder="VD: cong.nguyen"></div>
+            <div class="field"><label style="color:#fff;">Tên hiển thị</label><input type="text" id="newMemName" placeholder="VD: KS CÔNG"></div>
+            <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Nhập..."></div>
+            <div class="field">
+              <label style="color:#fff;">Phân quyền</label>
+              <select id="newMemRole">
+                <option value="guest">👁️ Khách (Xem)</option>
+                <option value="member" selected>👤 Thành viên</option>
+                <option value="manager">⭐ Trưởng nhóm</option>
+                <option value="superadmin">👑 Quản trị</option>
+              </select>
+            </div>
+            <button class="btn btn-cyan" onclick="addMemberFromModal()" style="height:41px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; padding:0 16px;">＋ Tạo</button>
+          </div>
+          <div id="memberManageList" style="display: flex; flex-direction: column; gap: 8px; margin-top:16px;"></div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('memberManageModal')">Đóng</button></div>
+      </div></div>
+
+      <!-- MODAL RFI: TẠO MỚI CÔNG VĂN / RFI -->
+      <div class="modal-overlay" id="createRfiModal"><div class="modal">
+        <div class="modal-head"><h3>＋ Ghi nhận Công văn / RFI Mới</h3><button class="modal-close" onclick="closeModal('createRfiModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Mã CV / RFI</label><input type="text" id="newRfiCode" placeholder="VD: CV-01 hoặc để trống hệ thống tự tạo"></div>
+          <div class="field"><label>Chủ đề chung *</label><input type="text" id="newRfiTitle" placeholder="VD: Thay đổi thiết kế dầm tầng 2"></div>
+          <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
+          <div class="field"><label style="color: var(--cyan);">Nội dung (Mục 1) *</label><textarea id="newRfiQuestion" rows="2" placeholder="Mô tả chi tiết lỗi hoặc vướng mắc..."></textarea></div>
+          <div class="field"><label>🔗 Liên kết với Bản vẽ</label><input type="text" id="newRfiLinkedDoc" placeholder="Mã bản vẽ (VD: SDS-002)..."></div>
+          <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+            <div class="paste-area" id="pasteArea" tabindex="0">
+              <div class="paste-area-text" id="pasteHint">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+              <div class="pasted-preview-container" id="imagePreviewContainer"><button class="remove-image-btn" onclick="removePastedImage('new', event)">✕</button><img src="" id="pastedImagePreview"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('createRfiModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewRfi()">💾 Tạo RFI</button></div>
+      </div></div>
+
+      <!-- MODAL RFI: BỔ SUNG MỤC MỚI VÀO CÔNG VĂN CŨ -->
+      <div class="modal-overlay" id="addItemModal"><div class="modal">
+        <div class="modal-head"><h3>＋ Thêm Mục Hỏi Mới</h3><button class="modal-close" onclick="closeModal('addItemModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc bổ sung *</label><textarea id="addItemQuestion" rows="3" placeholder="Nhập câu hỏi tiếp theo..."></textarea></div>
+          <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="addItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+          <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+            <div class="paste-area" id="pasteArea_add" tabindex="0">
+              <div class="paste-area-text" id="pasteHint_add">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+              <div class="pasted-preview-container" id="imagePreviewContainer_add"><button class="remove-image-btn" onclick="removePastedImage('add', event)">✕</button><img src="" id="pastedImagePreview_add"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addItemModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewItem()">💾 Lưu Mục Này</button></div>
+      </div></div>
+
+      <!-- MODAL RFI: SỬA MỤC HỎI CŨ -->
+      <div class="modal-overlay" id="editItemModal"><div class="modal">
+        <div class="modal-head"><h3>✎ Sửa Nội Dung Mục</h3><button class="modal-close" onclick="closeModal('editItemModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc *</label><textarea id="editItemQuestion" rows="3" placeholder="Nhập nội dung..."></textarea></div>
+          <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="editItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+          <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+            <div class="paste-area" id="pasteArea_edit" tabindex="0">
+              <div class="paste-area-text" id="pasteHint_edit">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh mới (sẽ ghi đè ảnh cũ)</div>
+              <div class="pasted-preview-container" id="imagePreviewContainer_edit"><button class="remove-image-btn" onclick="removePastedImage('edit', event)">✕</button><img src="" id="pastedImagePreview_edit"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editItemModal')">Hủy</button><button class="btn btn-primary" onclick="saveEditedItem()">💾 Cập nhật Nội Dung</button></div>
+      </div></div>
+
+      <!-- MODAL RFI: CẬP NHẬT HOẶC SỬA TRẢ LỜI CHO TỪNG MỤC -->
+      <div class="modal-overlay" id="replyModal"><div class="modal" style="max-width: 450px;">
+        <div class="modal-head"><h3 id="replyModalTitle">✏️ Cập nhật Phản hồi</h3><button class="modal-close" onclick="closeModal('replyModal')">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label style="color: var(--green);">Nội dung phản hồi / Giải quyết *</label><textarea id="replyText" rows="4" placeholder="Nhập đáp án của TVGS hoặc biện pháp khắc phục..."></textarea></div>
+          <div class="field"><label>Đính kèm hình ảnh phản hồi (Ctrl + V)</label>
+            <div class="paste-area" id="pasteArea_reply" tabindex="0">
+              <div class="paste-area-text" id="pasteHint_reply">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+              <div class="pasted-preview-container" id="imagePreviewContainer_reply"><button class="remove-image-btn" onclick="removePastedImage('reply', event)">✕</button><img src="" id="pastedImagePreview_reply"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('replyModal')">Hủy</button><button class="btn btn-primary" onclick="saveReply()">💾 Lưu Phản Hồi</button></div>
+      </div></div>
       
-      <div class="field"><label>Ghi chú / Nhận xét của TVGS & BQL</label><textarea id="roundNote" rows="2"></textarea></div>
-
-      <div class="field" style="margin-top:10px; border-top:1px dashed var(--border); padding-top:12px;">
-        <label style="color:var(--green);">Link bản vẽ ĐÃ DUYỆT CUỐI CÙNG (PDF)</label>
-        <input type="text" id="roundApprovedLink" placeholder="Chỉ nhập khi TVGS/BQL đã chốt bản cuối cùng...">
-      </div>
-
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('roundModal')">Hủy</button><button class="btn btn-cyan" id="btnSaveRound" onclick="saveRound()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
-  </div></div>
-
-  <!-- MODAL: KẾ HOẠCH RỜI -->
-  <div class="modal-overlay" id="planModal"><div class="modal">
-    <div class="modal-head"><h3 id="planModalTitle">Mục kế hoạch (Thủ công)</h3><button class="modal-close" onclick="closeModal('planModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Tên công việc / Bản vẽ *</label><input type="text" id="planTitle" oninput="this.classList.remove('error')"></div>
-      <div class="field-row">
-        <div class="field"><label>Mã tham chiếu</label><input type="text" id="planCode"></div>
-        <div class="field">
-            <label>Ngày duyệt xong * <button type="button" class="btn-date-quick" onclick="document.getElementById('planDate').value = todayIso(); document.getElementById('planDate').classList.remove('error');">Hôm nay</button></label>
-            <input type="date" id="planDate" oninput="this.classList.remove('error')">
-        </div>
-      </div>
-      <div class="field"><label>Nhân sự thực hiện</label><select id="planAssignee"></select></div>
-      <div class="field"><label>Link với Hồ sơ có sẵn</label><select id="planLinkedDoc" onchange="togglePlanManualStatus()"></select></div>
-      <div class="field" id="planManualStatusField"><label>Trạng thái ảo</label><select id="planManualStatus"><option value="chua-trinh">Chưa trình</option><option value="dang-xu-ly">Đang chờ duyệt</option><option value="hoan-thanh">Đã duyệt xong</option></select></div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('planModal')">Hủy</button><button class="btn btn-primary" onclick="savePlan()">💾 Lưu</button></div>
-  </div></div>
-
-  <!-- MODAL: QUẢN LÝ TÀI KHOẢN (ĐÃ UPDATE TÍNH NĂNG INLINE EDIT VÀ TÁCH USERNAME) -->
-  <div class="modal-overlay" id="memberManageModal"><div class="modal" style="max-width:700px;">
-    <div class="modal-head"><h3>Quản lý Tài khoản & Phân quyền</h3><button class="modal-close" onclick="closeModal('memberManageModal')">✕</button></div>
-    <div class="modal-body">
-      <!-- Vùng tạo mới Nhân sự -->
-      <div class="field-row" style="background:var(--blue-bg); padding:16px; border-radius:12px; align-items:flex-end; flex-wrap:wrap;">
-        <div class="field"><label style="color:#fff;">Tên đăng nhập (ID)</label><input type="text" id="newMemUsername" placeholder="VD: cong.nguyen"></div>
-        <div class="field"><label style="color:#fff;">Tên hiển thị</label><input type="text" id="newMemName" placeholder="VD: KS CÔNG"></div>
-        <div class="field"><label style="color:#fff;">Mật khẩu</label><input type="text" id="newMemPass" placeholder="Nhập..."></div>
-        <div class="field">
-          <label style="color:#fff;">Phân quyền</label>
-          <select id="newMemRole">
-            <option value="member">👤 Thành viên</option>
-            <option value="manager">⭐ Trưởng nhóm</option>
-            <option value="superadmin">👑 Quản trị</option>
-          </select>
-        </div>
-        <button class="btn btn-cyan" onclick="addMemberFromModal()" style="height:41px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; padding:0 16px;">＋ Tạo</button>
-      </div>
-      <!-- Danh sách Nhân sự để chỉnh sửa -->
-      <div id="memberManageList" style="display: flex; flex-direction: column; gap: 8px; margin-top:16px;"></div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('memberManageModal')">Đóng</button></div>
-  </div></div>
-
-  <!-- MODAL: LOGIN -->
-  <div class="modal-overlay" id="loginModal"><div class="modal" style="max-width:380px;">
-    <div class="modal-head"><h3>🔒 Đăng nhập hệ thống</h3><button class="modal-close" onclick="closeModal('loginModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Tên đăng nhập (ID)</label><input type="text" id="loginUsername" placeholder="Nhập Tên đăng nhập..." onkeydown="if(event.key==='Enter') executeLogin();"></div>
-      <div class="field"><label>Mật khẩu</label><input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') executeLogin();"></div>
-      <div id="loginError" style="color:var(--danger); font-size:12px; font-weight:700;"></div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('loginModal')">Hủy</button><button class="btn btn-primary" onclick="executeLogin()">Đăng nhập</button></div>
-  </div></div>
-
-  <!-- MODAL RFI: TẠO MỚI CÔNG VĂN / RFI -->
-  <div class="modal-overlay" id="createRfiModal"><div class="modal">
-    <div class="modal-head"><h3>＋ Ghi nhận Công văn / RFI Mới</h3><button class="modal-close" onclick="closeModal('createRfiModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Mã CV / RFI</label><input type="text" id="newRfiCode" placeholder="VD: CV-01 hoặc để trống hệ thống tự tạo"></div>
-      <div class="field"><label>Chủ đề chung *</label><input type="text" id="newRfiTitle" placeholder="VD: Thay đổi thiết kế dầm tầng 2"></div>
-      <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
-      <div class="field"><label style="color: var(--cyan);">Nội dung (Mục 1) *</label><textarea id="newRfiQuestion" rows="2" placeholder="Mô tả chi tiết lỗi hoặc vướng mắc..."></textarea></div>
-      <div class="field"><label>🔗 Liên kết với Bản vẽ</label><input type="text" id="newRfiLinkedDoc" placeholder="Mã bản vẽ (VD: SDS-002)..."></div>
-      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
-        <div class="paste-area" id="pasteArea" tabindex="0">
-          <div class="paste-area-text" id="pasteHint">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
-          <div class="pasted-preview-container" id="imagePreviewContainer"><button class="remove-image-btn" onclick="removePastedImage('new', event)">✕</button><img src="" id="pastedImagePreview"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('createRfiModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewRfi()">💾 Tạo RFI</button></div>
-  </div></div>
-
-  <!-- MODAL RFI: BỔ SUNG MỤC MỚI VÀO CÔNG VĂN CŨ -->
-  <div class="modal-overlay" id="addItemModal"><div class="modal">
-    <div class="modal-head"><h3>＋ Thêm Mục Hỏi Mới</h3><button class="modal-close" onclick="closeModal('addItemModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc bổ sung *</label><textarea id="addItemQuestion" rows="3" placeholder="Nhập câu hỏi tiếp theo..."></textarea></div>
-      <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="addItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
-      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
-        <div class="paste-area" id="pasteArea_add" tabindex="0">
-          <div class="paste-area-text" id="pasteHint_add">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
-          <div class="pasted-preview-container" id="imagePreviewContainer_add"><button class="remove-image-btn" onclick="removePastedImage('add', event)">✕</button><img src="" id="pastedImagePreview_add"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addItemModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewItem()">💾 Lưu Mục Này</button></div>
-  </div></div>
-
-  <!-- MODAL RFI: SỬA MỤC HỎI CŨ -->
-  <div class="modal-overlay" id="editItemModal"><div class="modal">
-    <div class="modal-head"><h3>✎ Sửa Nội Dung Mục</h3><button class="modal-close" onclick="closeModal('editItemModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc *</label><textarea id="editItemQuestion" rows="3" placeholder="Nhập nội dung..."></textarea></div>
-      <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="editItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
-      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
-        <div class="paste-area" id="pasteArea_edit" tabindex="0">
-          <div class="paste-area-text" id="pasteHint_edit">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh mới (sẽ ghi đè ảnh cũ)</div>
-          <div class="pasted-preview-container" id="imagePreviewContainer_edit"><button class="remove-image-btn" onclick="removePastedImage('edit', event)">✕</button><img src="" id="pastedImagePreview_edit"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editItemModal')">Hủy</button><button class="btn btn-primary" onclick="saveEditedItem()">💾 Cập nhật Nội Dung</button></div>
-  </div></div>
-
-  <!-- MODAL RFI: CẬP NHẬT HOẶC SỬA TRẢ LỜI CHO TỪNG MỤC -->
-  <div class="modal-overlay" id="replyModal"><div class="modal" style="max-width: 450px;">
-    <div class="modal-head"><h3 id="replyModalTitle">✏️ Cập nhật Phản hồi</h3><button class="modal-close" onclick="closeModal('replyModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label style="color: var(--green);">Nội dung phản hồi / Giải quyết *</label><textarea id="replyText" rows="4" placeholder="Nhập đáp án của TVGS hoặc biện pháp khắc phục..."></textarea></div>
-      <div class="field"><label>Đính kèm hình ảnh phản hồi (Ctrl + V)</label>
-        <div class="paste-area" id="pasteArea_reply" tabindex="0">
-          <div class="paste-area-text" id="pasteHint_reply">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
-          <div class="pasted-preview-container" id="imagePreviewContainer_reply"><button class="remove-image-btn" onclick="removePastedImage('reply', event)">✕</button><img src="" id="pastedImagePreview_reply"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('replyModal')">Hủy</button><button class="btn btn-primary" onclick="saveReply()">💾 Lưu Phản Hồi</button></div>
-  </div></div>
+  </div> <!-- HẾT mainAppWrapper -->
 
   <div class="toast" id="toast"></div>
 
 <script>
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTsHC531V8MPYeQRUOIuSbuVYe2pPu0OdT-6gQBTZghIMVyfsQVs5rz5psvxXEgi-75hVTQHls9dB/pub?output=csv";
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', ADMIN_SESSION_KEY = 'lhbimUser';
@@ -436,7 +511,7 @@ const TYPE_META = {
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
 
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] };
-let accounts = []; // Mảng accounts giờ lấy từ Sheet, cấu trúc: {username, name, role}
+let accounts = []; 
 let settings = { defaultSla: 3 };
 let currentType = 'shopdrawing', currentView = 'docs', statsType = 'all', viewState = 'list';
 let planFilterType = 'all'; 
@@ -463,28 +538,20 @@ function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 
-let currentTheme = localStorage.getItem('lhbimTheme') || 'dark';
-if (currentTheme === 'light') document.body.setAttribute('data-theme', 'light');
-function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', currentTheme); localStorage.setItem('lhbimTheme', currentTheme); }
-
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
-  
   if (dataPayload.action !== 'login') {
       if (!currentUser || !currentUser.token) {
           alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
-          openAuthModal(); return false;
+          executeLogout(); return false;
       }
       dataPayload.username = currentUser.username;
       dataPayload.token = currentUser.token;
   }
-
   try {
     const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(dataPayload) });
     const json = safeJSON(await res.text(), null); 
-    if (json && json.status === 'error' && json.message.includes('Lỗi Bảo Mật')) {
-        alert(json.message); executeLogout(); return false;
-    }
+    if (json && json.status === 'error' && json.message.includes('Lỗi Bảo Mật')) { alert(json.message); executeLogout(); return false; }
     return json && json.status === 'success';
   } catch (e) { return false; }
 }
@@ -493,46 +560,62 @@ function isSuperAdmin(){ return currentUser && (currentUser.role === 'superadmin
 function isManager(){ return currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.role === 'admin'); }
 function isMember(){ return currentUser && currentUser.role === 'member'; }
 
-function openAuthModal() {
-  document.getElementById('loginUsername').value = ''; 
-  document.getElementById('loginPassword').value = ''; 
-  document.getElementById('loginError').innerText = ''; 
-  document.getElementById('loginModal').classList.add('open'); 
-  setTimeout(() => document.getElementById('loginUsername').focus(), 50);
+// ================= HÀM XỬ LÝ GIAO DIỆN ĐĂNG NHẬP MỚI =================
+function toggleMainPassword() {
+  const p = document.getElementById('mainLoginPass');
+  p.type = p.type === 'password' ? 'text' : 'password';
 }
 
-async function executeLogin() {
-  const u = document.getElementById('loginUsername').value.trim();
-  const p = document.getElementById('loginPassword').value.trim();
-  if(!u || !p) { document.getElementById('loginError').innerText = 'Vui lòng nhập đầy đủ!'; return; }
+async function executeMainLogin() {
+  const u = document.getElementById('mainLoginUser').value.trim();
+  const p = document.getElementById('mainLoginPass').value.trim();
+  const alertBox = document.getElementById('mainLoginAlert');
+  const btn = document.getElementById('btnMainLogin');
   
-  document.getElementById('loginError').innerText = '⏳ Đang xác thực...';
+  if(!u || !p) { alertBox.innerText = 'Vui lòng nhập đầy đủ Tài khoản và Mật khẩu!'; alertBox.style.display = 'block'; return; }
+  
+  btn.innerText = '⏳ Đang kiểm tra an ninh...'; btn.disabled = true; alertBox.style.display = 'none';
+  
   try {
       const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username: u, password: p }) });
       const json = await res.json();
+      
       if (json && json.status === 'success') {
           currentUser = { username: u.toLowerCase(), name: json.name, role: json.role, token: json.token };
           sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser));
-          closeModal('loginModal'); render(); showToast(`✅ Xin chào ${currentUser.name}!`);
-      } else { document.getElementById('loginError').innerText = json.message || 'Sai tài khoản/mật khẩu!'; }
-  } catch(e) { document.getElementById('loginError').innerText = 'Lỗi kết nối máy chủ!'; }
+          
+          document.getElementById('fullPageLogin').style.display = 'none';
+          document.getElementById('mainAppWrapper').style.display = 'block';
+          
+          document.getElementById('mainLoginUser').value = ''; document.getElementById('mainLoginPass').value = '';
+          await loadAll(); render(); showToast(`✅ Xin chào ${currentUser.name}!`);
+      } else { alertBox.innerText = json.message || 'Sai tài khoản hoặc mật khẩu!'; alertBox.style.display = 'block'; }
+  } catch(e) { alertBox.innerText = 'Lỗi kết nối đến máy chủ!'; alertBox.style.display = 'block'; } 
+  finally { btn.innerText = 'Đăng nhập an toàn'; btn.disabled = false; }
 }
 
-function executeLogout() { currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); render(); showToast('Đã đăng xuất!'); }
+function executeLogout() { 
+  currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); 
+  document.getElementById('mainAppWrapper').style.display = 'none';
+  document.getElementById('fullPageLogin').style.display = 'flex';
+  showToast('Đã đăng xuất!'); 
+}
+// ====================================================================
 
 function renderAuthArea(){
   const wrap = document.getElementById('authArea');
-  if(!currentUser) { 
-    wrap.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()" style="font-size: 13px; padding: 7px 16px;">🔒 Đăng nhập</button>`; 
-  } else { 
+  if(currentUser) { 
     let roleBadge = '👤 ' + escapeHtml(currentUser.name);
-    if(isSuperAdmin()) roleBadge = '👑 Quản trị';
+    if(isSuperAdmin()) roleBadge = '👑 Quản trị'; 
     else if(isManager()) roleBadge = '⭐ Trưởng nhóm';
+    else if(currentUser.role === 'guest') roleBadge = '👁️ Khách';
+    
     wrap.innerHTML = `<div class="admin-pill" onclick="executeLogout()"><span class="dot"></span> ${roleBadge} - Thoát</div>`; 
   }
 }
 
 function canUpdateProgress(docAssignee) { 
+  if (!currentUser || currentUser.role === 'guest') return false; 
   if (isManager()) return true; 
   if (isMember() && docAssignee) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } 
   return false; 
@@ -826,7 +909,7 @@ function renderRfiView() {
       let linkedDocTag = item.linkedDoc ? `<span class="tag" style="background: rgba(3, 105, 161, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3);">🔗 Tham chiếu: ${escapeHtml(item.linkedDoc)}</span>` : '';
       
       let editQuestionBtn = '';
-      if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.name === r.author)) {
+      if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.name === r.author) && currentUser.role !== 'guest') {
           editQuestionBtn = `<button class="btn btn-ghost btn-sm" onclick="openEditItemModal('${r.id}', '${item.id}', '${escapeHtml(item.question).replace(/'/g, "\\'")}', '${escapeHtml(item.linkedDoc).replace(/'/g, "\\'")}', '${escapeHtml(item.qImage).replace(/'/g, "\\'")}')">✎ Sửa</button>`;
       }
 
@@ -836,16 +919,16 @@ function renderRfiView() {
         if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin')) { editReplyBtn = `<button class="btn btn-ghost btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '${escapeHtml(item.reply).replace(/'/g, "\\'")}', '${escapeHtml(item.rImage).replace(/'/g, "\\'")}')">✎ Sửa</button>`; }
         replyBox = `<div class="rfi-reply"><div class="rfi-r-title"><span>Phản hồi (${item.replyDate}):</span>${editReplyBtn}</div><div class="rfi-r-text">${escapeHtml(item.reply)}</div>${rThumb}</div>`;
       } else {
-        replyBox = `<div class="rfi-pending-reply"><span style="font-size:13px; font-weight:700; color:var(--amber);">⏳ Đang chờ trả lời...</span>${currentUser ? `<button class="btn btn-primary btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '', '')">✏️ Cập nhật trả lời</button>` : ''}</div>`;
+        replyBox = `<div class="rfi-pending-reply"><span style="font-size:13px; font-weight:700; color:var(--amber);">⏳ Đang chờ trả lời...</span>${(currentUser && currentUser.role !== 'guest') ? `<button class="btn btn-primary btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '', '')">✏️ Cập nhật trả lời</button>` : ''}</div>`;
       }
 
       return `<div class="rfi-item"><div class="rfi-question"><div class="rfi-q-title"><div style="display:flex; align-items:center; gap:8px;">MỤC SỐ ${idx + 1} ${linkedDocTag}</div>${editQuestionBtn}</div><div class="rfi-q-text">${escapeHtml(item.question)}</div>${qThumb}</div>${replyBox}</div>`;
     }).join('');
 
-    return `<div class="rfi-card"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;"><div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${r.date} | Người tạo: ${escapeHtml(r.author)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div></div><div class="rfi-item-list">${itemsHtml}</div>${currentUser ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}</div>`;
+    return `<div class="rfi-card"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;"><div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${r.date} | Người tạo: ${escapeHtml(r.author)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div></div><div class="rfi-item-list">${itemsHtml}</div>${(currentUser && currentUser.role !== 'guest') ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}</div>`;
   }).join('');
 
-  return `<div class="toolbar-row1" style="margin-bottom: 24px; margin-top:20px;"><div class="search-box"><span>🔍</span><input type="text" placeholder="Tìm nội dung vướng mắc, mã bản vẽ..."></div><button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ</button>${currentUser ? `<button class="btn btn-primary" onclick="openCreateRfiModal()">＋ Tạo Công văn / RFI mới</button>` : ''}</div><div class="rfi-timeline">${rfiHtml}</div>`;
+  return `<div class="toolbar-row1" style="margin-bottom: 24px; margin-top:20px;"><div class="search-box"><span>🔍</span><input type="text" placeholder="Tìm nội dung vướng mắc, mã bản vẽ..."></div><button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ</button>${(currentUser && currentUser.role !== 'guest') ? `<button class="btn btn-primary" onclick="openCreateRfiModal()">＋ Tạo Công văn / RFI mới</button>` : ''}</div><div class="rfi-timeline">${rfiHtml}</div>`;
 }
 
 function renderDocRow(d){
@@ -873,10 +956,7 @@ function renderDocRow(d){
 
 function renderListView(){
   const cats = docTypeCategories(currentType), cOpts = cats.map(c => `<option value="${escapeHtml(c)}" ${filterCategory === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-  
-  // TẠO DANH SÁCH LỰA CHỌN NHÂN SỰ CHO BỘ LỌC (DÙNG TÊN HIỂN THỊ)
   const aOpts = accounts.map(a => `<option value="${escapeHtml(a.name)}" ${filterAssignee === a.name ? 'selected' : ''}>👤 ${escapeHtml(a.name)}</option>`).join('');
-  
   const groupedList = groupedDocs(), totalCount = groupedList.reduce((s,g) => s + g.items.length, 0);
 
   let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào trong mục ${TYPE_META[currentType].label}.</div>` : groupedList.map(g => {
@@ -1058,13 +1138,14 @@ function openMemberManageModal(){
 function renderMemberManageList(){
   const wrap = document.getElementById('memberManageList');
   wrap.innerHTML = accounts.map((a, idx) => {
-    let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐';
+    let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐'; else if(a.role==='guest') icon='👁️';
     return `
     <div class="group-manage-item" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-      <div style="width:100px; font-size:11px; color:var(--ink-light); overflow:hidden; text-overflow:ellipsis;">${escapeHtml(a.username)}</div>
+      <div style="width:100px; font-size:11px; color:var(--ink-light); overflow:hidden; text-overflow:ellipsis;">${icon} ${escapeHtml(a.username)}</div>
       <input type="text" id="editName_${idx}" value="${escapeHtml(a.name)}" placeholder="Tên hiển thị" style="flex:1; min-width:100px; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 13px; font-weight:bold;">
       <input type="password" id="editPass_${idx}" placeholder="Đổi MK mới" style="width: 100px; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 12px;">
       <select id="editRole_${idx}" style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); font-size: 12px; outline: none;">
+        <option value="guest" ${a.role === 'guest' ? 'selected' : ''}>👁️ Khách (Xem)</option>
         <option value="member" ${a.role === 'member' ? 'selected' : ''}>👤 Thành viên</option>
         <option value="manager" ${a.role === 'manager' ? 'selected' : ''}>⭐ Trưởng nhóm</option>
         <option value="superadmin" ${a.role === 'superadmin' ? 'selected' : ''}>👑 Quản trị</option>
@@ -1248,7 +1329,18 @@ function savePlan(){
   savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
 }
 
-window.onload = async function() { try { await loadAll(); } catch(err) { } finally { render(); } };
+// ================= KIỂM TRA ĐĂNG NHẬP NGAY TỪ ĐẦU =================
+window.onload = async function() { 
+  if (currentUser && currentUser.token) {
+     document.getElementById('fullPageLogin').style.display = 'none';
+     document.getElementById('mainAppWrapper').style.display = 'block';
+  } else {
+     document.getElementById('fullPageLogin').style.display = 'flex';
+     document.getElementById('mainAppWrapper').style.display = 'none';
+  }
+  
+  try { await loadAll(); } catch(err) { } finally { render(); } 
+};
 </script>
 </body>
 </html>
