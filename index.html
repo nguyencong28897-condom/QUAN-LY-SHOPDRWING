@@ -134,6 +134,42 @@
   .kpi-box .num { font-size: 24px; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
   .kpi-box .lbl { font-size: 11px; color: var(--ink-light); text-transform: uppercase; font-weight: 700; }
   .empty-state { padding: 40px 20px; text-align: center; color: var(--ink-faint); font-weight: 600; border: 1px dashed var(--border); border-radius: 12px; }
+
+  /* ================= CSS TÍNH NĂNG RFI ================= */
+  .rfi-timeline { margin-top: 20px; display: flex; flex-direction: column; gap: 20px; }
+  .rfi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+  .rfi-card:hover { border-color: var(--primary); }
+  
+  .rfi-item-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+  .rfi-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  
+  .rfi-question { padding: 14px; border-bottom: 1px dashed var(--border); position: relative; }
+  .rfi-q-title { font-size: 11px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rfi-q-text { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+  
+  .rfi-reply { padding: 14px; background: rgba(52, 211, 153, 0.05); border-left: 3px solid var(--green); position: relative;}
+  .rfi-r-title { font-size: 11.5px; font-weight: 800; color: var(--green); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;}
+  .rfi-r-text { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+  
+  .rfi-pending-reply { padding: 14px; background: rgba(251, 191, 36, 0.05); border-left: 3px solid var(--amber); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+  
+  .rfi-thumb-wrapper { margin-top: 12px; }
+  .rfi-thumb { height: 90px; border-radius: 8px; object-fit: cover; cursor: zoom-in; border: 1px solid var(--border); transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .rfi-thumb:hover { border-color: var(--cyan); transform: scale(1.03); }
+  
+  .image-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: zoom-out; }
+  .image-lightbox.open { display: flex; }
+  .image-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,1); object-fit: contain; }
+  .lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 24px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+  /* CSS DÀNH RIÊNG CHO FORM DÁN ẢNH */
+  .paste-area { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; background: var(--bg); transition: 0.2s; cursor: pointer; position: relative; }
+  .paste-area:hover, .paste-area:focus { border-color: var(--primary); background: rgba(56, 189, 248, 0.05); outline: none; }
+  .paste-area-text { font-size: 13px; font-weight: 700; color: var(--ink-faint); pointer-events: none; }
+  .pasted-preview-container { display: none; position: relative; margin-top: 10px; }
+  .pasted-preview-container img { max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border); }
+  .remove-image-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+  .remove-image-btn:hover { background: var(--danger); }
 </style>
 </head>
 <body data-theme="dark">
@@ -157,6 +193,12 @@
   <div class="shell">
     <div class="tabs" id="tabsWrap"></div>
     <div id="appWrap"></div>
+  </div>
+
+  <!-- LỚP PHỦ LIGHTBOX ĐỂ ZOOM ẢNH -->
+  <div class="image-lightbox" id="imageLightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img src="" id="lightboxImg" onclick="event.stopPropagation()">
   </div>
 
   <!-- MODAL: HỒ SƠ GỐC -->
@@ -312,6 +354,72 @@
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('loginModal')">Hủy</button><button class="btn btn-primary" onclick="executeLogin()">Đăng nhập</button></div>
   </div></div>
 
+  <!-- MODAL RFI: TẠO MỚI CÔNG VĂN / RFI -->
+  <div class="modal-overlay" id="createRfiModal"><div class="modal">
+    <div class="modal-head"><h3>＋ Ghi nhận Công văn / RFI Mới</h3><button class="modal-close" onclick="closeModal('createRfiModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Mã CV / RFI</label><input type="text" id="newRfiCode" placeholder="VD: CV-01 hoặc để trống hệ thống tự tạo"></div>
+      <div class="field"><label>Chủ đề chung *</label><input type="text" id="newRfiTitle" placeholder="VD: Thay đổi thiết kế dầm tầng 2"></div>
+      <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
+      <div class="field"><label style="color: var(--cyan);">Nội dung (Mục 1) *</label><textarea id="newRfiQuestion" rows="2" placeholder="Mô tả chi tiết lỗi hoặc vướng mắc..."></textarea></div>
+      <div class="field"><label>🔗 Liên kết với Bản vẽ</label><input type="text" id="newRfiLinkedDoc" placeholder="Mã bản vẽ (VD: SDS-002)..."></div>
+      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+        <div class="paste-area" id="pasteArea" tabindex="0">
+          <div class="paste-area-text" id="pasteHint">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+          <div class="pasted-preview-container" id="imagePreviewContainer"><button class="remove-image-btn" onclick="removePastedImage('new', event)">✕</button><img src="" id="pastedImagePreview"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('createRfiModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewRfi()">💾 Tạo RFI</button></div>
+  </div></div>
+
+  <!-- MODAL RFI: BỔ SUNG MỤC MỚI VÀO CÔNG VĂN CŨ -->
+  <div class="modal-overlay" id="addItemModal"><div class="modal">
+    <div class="modal-head"><h3>＋ Thêm Mục Hỏi Mới</h3><button class="modal-close" onclick="closeModal('addItemModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc bổ sung *</label><textarea id="addItemQuestion" rows="3" placeholder="Nhập câu hỏi tiếp theo..."></textarea></div>
+      <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="addItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+        <div class="paste-area" id="pasteArea_add" tabindex="0">
+          <div class="paste-area-text" id="pasteHint_add">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+          <div class="pasted-preview-container" id="imagePreviewContainer_add"><button class="remove-image-btn" onclick="removePastedImage('add', event)">✕</button><img src="" id="pastedImagePreview_add"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addItemModal')">Hủy</button><button class="btn btn-cyan" onclick="saveNewItem()">💾 Lưu Mục Này</button></div>
+  </div></div>
+
+  <!-- MODAL RFI: SỬA MỤC HỎI CŨ -->
+  <div class="modal-overlay" id="editItemModal"><div class="modal">
+    <div class="modal-head"><h3>✎ Sửa Nội Dung Mục</h3><button class="modal-close" onclick="closeModal('editItemModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc *</label><textarea id="editItemQuestion" rows="3" placeholder="Nhập nội dung..."></textarea></div>
+      <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="editItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+      <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
+        <div class="paste-area" id="pasteArea_edit" tabindex="0">
+          <div class="paste-area-text" id="pasteHint_edit">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh mới (sẽ ghi đè ảnh cũ)</div>
+          <div class="pasted-preview-container" id="imagePreviewContainer_edit"><button class="remove-image-btn" onclick="removePastedImage('edit', event)">✕</button><img src="" id="pastedImagePreview_edit"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editItemModal')">Hủy</button><button class="btn btn-primary" onclick="saveEditedItem()">💾 Cập nhật Nội Dung</button></div>
+  </div></div>
+
+  <!-- MODAL RFI: CẬP NHẬT HOẶC SỬA TRẢ LỜI CHO TỪNG MỤC -->
+  <div class="modal-overlay" id="replyModal"><div class="modal" style="max-width: 450px;">
+    <div class="modal-head"><h3 id="replyModalTitle">✏️ Cập nhật Phản hồi</h3><button class="modal-close" onclick="closeModal('replyModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label style="color: var(--green);">Nội dung phản hồi / Giải quyết *</label><textarea id="replyText" rows="4" placeholder="Nhập đáp án của TVGS hoặc biện pháp khắc phục..."></textarea></div>
+      <div class="field"><label>Đính kèm hình ảnh phản hồi (Ctrl + V)</label>
+        <div class="paste-area" id="pasteArea_reply" tabindex="0">
+          <div class="paste-area-text" id="pasteHint_reply">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
+          <div class="pasted-preview-container" id="imagePreviewContainer_reply"><button class="remove-image-btn" onclick="removePastedImage('reply', event)">✕</button><img src="" id="pastedImagePreview_reply"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('replyModal')">Hủy</button><button class="btn btn-primary" onclick="saveReply()">💾 Lưu Phản Hồi</button></div>
+  </div></div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -319,13 +427,16 @@
 // CẤU HÌNH ĐƯỜNG DẪN ĐỒNG BỘ 2 CHIỀU GOOGLE SHEET & APPS SCRIPT
 // ============================================================================
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSTsHC531V8MPYeQRUOIuSbuVYe2pPu0OdT-6gQBTZghIMVyfsQVs5rz5psvxXEgi-75hVTQHls9dB/pub?output=csv";
+
+// ĐƯỜNG LINK CỦA BẠN ĐÃ ĐƯỢC CÀI ĐẶT CHUẨN XÁC Ở ĐÂY:
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', MEMBER_KEY = 'lhbimAccounts', ADMIN_SESSION_KEY = 'lhbimUser', ADMIN_PASSWORD = 'admin';
 
 const TYPE_META = { 
   shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, 
-  bienphap: { label:'Biện pháp thi công (MSS)', icon:'📋' } 
+  bienphap: { label:'Biện pháp thi công (MSS)', icon:'📋' },
+  rfi: { label:'Nhật ký Vướng mắc (RFI)', icon:'📨' }
 };
 
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
@@ -339,6 +450,12 @@ let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup =
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
 let currentUser = null;
 
+// Biến cho RFI (Khởi tạo mảng trống để load từ API)
+let rfis = [];
+let tempImageBase64 = null; 
+let activeRfiId = null;
+let activeItemId = null;
+
 // Helpers
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
 function makeStableDocId(code, name) { return 'doc_' + encodeURIComponent(((code||'')+'_'+(name||'')).trim().toLowerCase()).replace(/[^a-zA-Z0-9_-]/g, '_'); }
@@ -351,6 +468,7 @@ function showToast(msg){ const t = document.getElementById('toast'); t.innerText
 function closeModal(id){ document.getElementById(id).classList.remove('open'); document.querySelectorAll('.error').forEach(el => el.classList.remove('error')); }
 function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(el) el.innerHTML = `<option value="">${dflt}</option>` + arr.map(x=>`<option value="${escapeHtml(x.val)}" ${x.val===sel?'selected':''}>${escapeHtml(x.lbl)}</option>`).join(''); }
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
+function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 
 let currentTheme = localStorage.getItem('lhbimTheme') || 'dark';
 if (currentTheme === 'light') document.body.setAttribute('data-theme', 'light');
@@ -416,13 +534,29 @@ function canUpdateProgress(docAssignee) {
 }
 function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
 function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
-// -----------------------------------------------------
 
 function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function saveCategories(){ localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
 function saveGroups(){ localStorage.setItem(GROUP_KEY, JSON.stringify(groups)); }
 function savePlans(){ localStorage.setItem(PLAN_KEY, JSON.stringify(plans)); }
 function saveMembers(){ localStorage.setItem(MEMBER_KEY, JSON.stringify(accounts)); }
+
+// HÀM DỊCH DỮ LIỆU TỪ SHEET THÀNH MẢNG RFI TRÊN WEB
+function parseRowsToRfis(rows) {
+  let rfiMap = {};
+  for (let i = 1; i < rows.length; i++) {
+    let cols = rows[i];
+    if (!cols || !cols[0]) continue;
+    let rId = cols[0];
+    if (!rfiMap[rId]) {
+      rfiMap[rId] = { id: rId, code: cols[1], title: cols[2], date: cols[3], author: cols[4], status: cols[12], items: [] };
+    }
+    rfiMap[rId].items.push({
+      id: cols[5], linkedDoc: cols[6], question: cols[7], qImage: cols[8], reply: cols[9], rImage: cols[10], replyDate: cols[11]
+    });
+  }
+  return Object.values(rfiMap).reverse(); 
+}
 
 async function loadAll(){
   categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories);
@@ -433,8 +567,7 @@ async function loadAll(){
     loadedAcc = [
       {name: 'KS CÔNG', pass: '123', role: 'superadmin'}, 
       {name: 'KS TƯỜNG', pass: '123', role: 'manager'}, 
-      {name: 'KS DUY', pass: '123', role: 'member'}, 
-      {name: 'KS KHANG', pass: '123', role: 'member'}
+      {name: 'KS DUY', pass: '123', role: 'member'}
     ];
   }
   accounts = loadedAcc;
@@ -443,7 +576,12 @@ async function loadAll(){
     const apiRes = await fetch(GOOGLE_APP_SCRIPT_API_URL + "?t=" + Date.now());
     if (apiRes.ok) {
       const json = await apiRes.json();
-      if (json && json.status === 'success' && Array.isArray(json.rows)) { docs = parseRowsToDocs(json.rows); saveDocs(); return; }
+      if (json && json.status === 'success') {
+        if (json.docs && json.docs.length > 0) docs = parseRowsToDocs(json.docs);
+        if (json.rfis && json.rfis.length > 0) rfis = parseRowsToRfis(json.rfis);
+        saveDocs(); 
+        return; 
+      }
     }
   } catch (err) { }
 
@@ -451,8 +589,9 @@ async function loadAll(){
     const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now());
     if (!res.ok) throw new Error("Mạng lỗi");
     const text = await res.text();
-    if (text.trim().toLowerCase().startsWith('<html')) throw new Error("Lỗi HTML");
-    docs = parseRowsToDocs(parseCSVTextToRows(text)); saveDocs();
+    if (!text.trim().toLowerCase().startsWith('<html')) {
+      docs = parseRowsToDocs(parseCSVTextToRows(text)); saveDocs();
+    }
   } catch(e) { docs = safeJSON(localStorage.getItem(STORAGE_KEY), []); }
 }
 
@@ -570,20 +709,250 @@ function toggleGroup(key){ if(collapsedGroups.has(key)) collapsedGroups.delete(k
 // System Rendering
 function render(){
   renderAuthArea(); 
-  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${currentView === 'docs' && currentType === t ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} <span class="tab-count">${docs.filter(d => d.type === t).length}</span></button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
+  document.getElementById('tabsWrap').innerHTML = Object.keys(TYPE_META).map(t => `<button class="tab-btn ${(currentView === 'docs' && currentType === t) || (currentView === 'rfi' && t === 'rfi') ? 'active' : ''}" onclick="switchTab('${t}')">${TYPE_META[t].icon} ${TYPE_META[t].label} ${t !== 'rfi' ? `<span class="tab-count">${docs.filter(d => d.type === t).length}</span>` : ''}</button>`).join('') + `<span class="tab-sep"></span><button class="tab-btn ${currentView === 'plan' ? 'active' : ''}" onclick="switchView('plan')">🗓️ Kế hoạch & Đồng bộ</button><button class="tab-btn ${currentView === 'stats' ? 'active' : ''}" onclick="switchView('stats')">📊 Thống kê KPI</button>`;
   const list = scopedDocs();
-  document.getElementById('heroStats').innerHTML = `<div class="hero-stat"><div class="num grad">${list.length}</div><div class="lbl">Tổng hồ sơ</div></div><div class="hero-stat"><div class="num grad">${list.reduce((s,d) => s + (d.rounds ? d.rounds.length : 0), 0)}</div><div class="lbl">Lượt trình</div></div><div class="hero-stat"><div class="num alert">${list.filter(isDocOverdue).length}</div><div class="lbl">🔴 Báo đỏ</div></div>`;
+  if (document.getElementById('heroStats')) {
+    document.getElementById('heroStats').innerHTML = `<div class="hero-stat"><div class="num grad">${list.length}</div><div class="lbl">Tổng hồ sơ</div></div><div class="hero-stat"><div class="num grad">${list.reduce((s,d) => s + (d.rounds ? d.rounds.length : 0), 0)}</div><div class="lbl">Lượt trình</div></div><div class="hero-stat"><div class="num alert">${list.filter(isDocOverdue).length}</div><div class="lbl">🔴 Báo đỏ</div></div>`;
+  }
   const wrap = document.getElementById('appWrap');
   if (currentView === 'stats') wrap.innerHTML = renderStatsView();
   else if (currentView === 'plan') wrap.innerHTML = renderPlanView();
+  else if (currentView === 'rfi') wrap.innerHTML = renderRfiView();
   else if (viewState === 'detail' && selectedId) wrap.innerHTML = renderDetailView();
   else wrap.innerHTML = renderListView();
 }
-function switchTab(t){ currentType = t; currentView = 'docs'; viewState = 'list'; selectedId = null; selectedPlans.clear(); filterCategory = 'all'; filterGroup = 'all'; filterStatus = 'all'; render(); }
+
+function switchTab(t){ 
+  if(t === 'rfi') { currentView = 'rfi'; } 
+  else { currentType = t; currentView = 'docs'; viewState = 'list'; selectedId = null; selectedPlans.clear(); filterCategory = 'all'; filterGroup = 'all'; filterStatus = 'all';}
+  render(); 
+}
 function switchView(v){ currentView = v; selectedPlans.clear(); render(); window.scrollTo(0,0); }
 function goBack(){ viewState = 'list'; selectedId = null; render(); }
 function goToDetail(id){ selectedId = id; viewState = 'detail'; render(); window.scrollTo(0,0); }
 function goToDetailFromStats(id){ const d = docs.find(x => x.id === id); if(d){ currentType = d.type; currentView = 'docs'; goToDetail(id); } }
+
+// RFI Logic & UI
+function openLightbox(imageUrl) { const lb = document.getElementById('imageLightbox'); document.getElementById('lightboxImg').src = imageUrl; lb.classList.add('open'); }
+function closeLightbox() { document.getElementById('imageLightbox').classList.remove('open'); setTimeout(() => { document.getElementById('lightboxImg').src = ""; }, 300); }
+
+document.addEventListener('paste', function(e) {
+  const isCreate = document.getElementById('createRfiModal').classList.contains('open');
+  const isAdd = document.getElementById('addItemModal').classList.contains('open');
+  const isEdit = document.getElementById('editItemModal').classList.contains('open');
+  const isReply = document.getElementById('replyModal').classList.contains('open');
+  
+  if (!isCreate && !isAdd && !isEdit && !isReply) return;
+
+  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  for (let index in items) {
+    const item = items[index];
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        tempImageBase64 = event.target.result; 
+        if (isCreate) {
+          document.getElementById('pasteHint').style.display = 'none';
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+          document.getElementById('pastedImagePreview').src = tempImageBase64;
+          document.getElementById('pasteArea').style.borderColor = 'var(--green)';
+        } else if (isAdd) {
+          document.getElementById('pasteHint_add').style.display = 'none';
+          document.getElementById('imagePreviewContainer_add').style.display = 'block';
+          document.getElementById('pastedImagePreview_add').src = tempImageBase64;
+          document.getElementById('pasteArea_add').style.borderColor = 'var(--green)';
+        } else if (isEdit) {
+          document.getElementById('pasteHint_edit').style.display = 'none';
+          document.getElementById('imagePreviewContainer_edit').style.display = 'block';
+          document.getElementById('pastedImagePreview_edit').src = tempImageBase64;
+          document.getElementById('pasteArea_edit').style.borderColor = 'var(--green)';
+        } else if (isReply) {
+          document.getElementById('pasteHint_reply').style.display = 'none';
+          document.getElementById('imagePreviewContainer_reply').style.display = 'block';
+          document.getElementById('pastedImagePreview_reply').src = tempImageBase64;
+          document.getElementById('pasteArea_reply').style.borderColor = 'var(--green)';
+        }
+      };
+      reader.readAsDataURL(item.getAsFile()); e.preventDefault();
+    }
+  }
+});
+
+function loadExistingImageToPasteArea(type, imageUrl) {
+  if(imageUrl) {
+    tempImageBase64 = imageUrl; 
+    if(type === 'edit') {
+        document.getElementById('pasteHint_edit').style.display = 'none';
+        document.getElementById('imagePreviewContainer_edit').style.display = 'block';
+        document.getElementById('pastedImagePreview_edit').src = imageUrl;
+    } else if (type === 'reply') {
+        document.getElementById('pasteHint_reply').style.display = 'none';
+        document.getElementById('imagePreviewContainer_reply').style.display = 'block';
+        document.getElementById('pastedImagePreview_reply').src = imageUrl;
+    }
+  } else {
+     removePastedImage(type);
+  }
+}
+
+function removePastedImage(type, e) {
+  if (e) e.stopPropagation(); tempImageBase64 = null;
+  if(type === 'new') {
+    document.getElementById('pasteHint').style.display = 'block'; document.getElementById('imagePreviewContainer').style.display = 'none'; document.getElementById('pastedImagePreview').src = ''; document.getElementById('pasteArea').style.borderColor = 'var(--border)';
+  } else if(type === 'add') {
+    document.getElementById('pasteHint_add').style.display = 'block'; document.getElementById('imagePreviewContainer_add').style.display = 'none'; document.getElementById('pastedImagePreview_add').src = ''; document.getElementById('pasteArea_add').style.borderColor = 'var(--border)';
+  } else if(type === 'edit') {
+    document.getElementById('pasteHint_edit').style.display = 'block'; document.getElementById('imagePreviewContainer_edit').style.display = 'none'; document.getElementById('pastedImagePreview_edit').src = ''; document.getElementById('pasteArea_edit').style.borderColor = 'var(--border)';
+  } else if(type === 'reply') {
+    document.getElementById('pasteHint_reply').style.display = 'block'; document.getElementById('imagePreviewContainer_reply').style.display = 'none'; document.getElementById('pastedImagePreview_reply').src = ''; document.getElementById('pasteArea_reply').style.borderColor = 'var(--border)';
+  }
+}
+
+// CÁC HÀM XỬ LÝ LƯU RFI CÓ GỌI API ĐỒNG BỘ
+function openCreateRfiModal() {
+  document.getElementById('newRfiCode').value = ''; document.getElementById('newRfiTitle').value = ''; document.getElementById('newRfiQuestion').value = ''; document.getElementById('newRfiLinkedDoc').value = '';
+  removePastedImage('new'); document.getElementById('createRfiModal').classList.add('open');
+}
+
+async function saveNewRfi() {
+  const title = document.getElementById('newRfiTitle').value.trim(), q = document.getElementById('newRfiQuestion').value.trim();
+  if(!title || !q) { alert("Vui lòng điền Chủ đề và Nội dung!"); return; }
+  
+  const newRfi = { 
+    id: 'rfi_' + Date.now(), code: document.getElementById('newRfiCode').value || 'CV/RFI MỚI', title: title, date: todayDate(), author: currentUser.name, status: 'pending', 
+    items: [{ id: 'item_' + Date.now(), linkedDoc: document.getElementById('newRfiLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' }]
+  };
+  
+  rfis.unshift(newRfi);
+  closeModal('createRfiModal'); render(); 
+  
+  showToast("⏳ Đang nén ảnh và đẩy RFI lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: newRfi });
+  if(isSuccess) showToast("✅ Đã tạo RFI thành công trên Google Sheet!");
+  else showToast("⚠️ Đã tạo RFI nhưng lỗi đồng bộ với máy chủ!");
+}
+
+function openAddItemModal(rfiId) {
+  activeRfiId = rfiId; document.getElementById('addItemQuestion').value = ''; document.getElementById('addItemLinkedDoc').value = '';
+  removePastedImage('add'); document.getElementById('addItemModal').classList.add('open');
+}
+
+async function saveNewItem() {
+  const q = document.getElementById('addItemQuestion').value.trim();
+  if(!q) { alert("Vui lòng điền nội dung!"); return; }
+  let rfi = rfis.find(r => r.id === activeRfiId);
+  rfi.items.push({ id: 'item_' + Date.now(), linkedDoc: document.getElementById('addItemLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' });
+  rfi.status = 'pending'; 
+  closeModal('addItemModal'); render(); 
+  
+  showToast("⏳ Đang đồng bộ mục mới lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
+  if(isSuccess) showToast("✅ Bổ sung mục hỏi thành công!");
+  else showToast("⚠️ Lỗi đồng bộ với máy chủ!");
+}
+
+function openEditItemModal(rfiId, itemId, existingQuestion, existingLinkedDoc, existingQImage) {
+  activeRfiId = rfiId; activeItemId = itemId;
+  document.getElementById('editItemQuestion').value = existingQuestion || ''; 
+  document.getElementById('editItemLinkedDoc').value = existingLinkedDoc || ''; 
+  loadExistingImageToPasteArea('edit', existingQImage);
+  document.getElementById('editItemModal').classList.add('open');
+}
+
+async function saveEditedItem() {
+  const q = document.getElementById('editItemQuestion').value.trim();
+  if(!q) { alert("Vui lòng điền nội dung!"); return; }
+  let rfi = rfis.find(r => r.id === activeRfiId);
+  let item = rfi.items.find(i => i.id === activeItemId);
+  item.question = q;
+  item.linkedDoc = document.getElementById('editItemLinkedDoc').value.trim();
+  item.qImage = tempImageBase64 !== null ? tempImageBase64 : item.qImage;
+  
+  closeModal('editItemModal'); render(); 
+  
+  showToast("⏳ Đang lưu thay đổi lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
+  if(isSuccess) showToast("✅ Cập nhật mục thành công!");
+  else showToast("⚠️ Lỗi đồng bộ với máy chủ!");
+}
+
+function openReplyModal(rfiId, itemId, existingReply, existingRImage) {
+  activeRfiId = rfiId; activeItemId = itemId;
+  document.getElementById('replyModalTitle').innerText = existingReply ? "✏️ Sửa Phản hồi" : "✏️ Cập nhật Phản hồi";
+  document.getElementById('replyText').value = existingReply || ''; 
+  loadExistingImageToPasteArea('reply', existingRImage);
+  document.getElementById('replyModal').classList.add('open');
+}
+
+async function saveReply() {
+  const txt = document.getElementById('replyText').value.trim();
+  if(!txt) { alert("Vui lòng nhập nội dung phản hồi!"); return; }
+  let rfi = rfis.find(r => r.id === activeRfiId);
+  let item = rfi.items.find(i => i.id === activeItemId);
+  item.reply = txt; item.replyDate = item.replyDate || todayDate(); 
+  item.rImage = tempImageBase64 !== null ? tempImageBase64 : item.rImage;
+  
+  if (rfi.items.every(i => i.reply.trim() !== '')) rfi.status = 'approved';
+  
+  closeModal('replyModal'); render(); 
+  
+  showToast("⏳ Đang nén ảnh và lưu phản hồi lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
+  if(isSuccess) showToast("✅ Đã lưu kết quả thành công!");
+  else showToast("⚠️ Lỗi đồng bộ với máy chủ!");
+}
+
+function renderRfiView() {
+  let rfiHtml = rfis.length === 0 ? `<div class="empty-state">Chưa có ghi nhận vướng mắc nào.</div>` : rfis.map(r => {
+    let overallStatusHtml = r.status === 'pending' ? `<span class="tag status-pending">⏳ Đang xử lý</span>` : `<span class="tag status-approved">✅ Đã đóng (Xong)</span>`;
+    
+    let itemsHtml = r.items.map((item, idx) => {
+      let qThumb = item.qImage ? `<div class="rfi-thumb-wrapper"><img src="${escapeHtml(item.qImage)}" class="rfi-thumb" title="Bấm để phóng to" onclick="openLightbox('${escapeHtml(item.qImage)}')"></div>` : '';
+      let rThumb = item.rImage ? `<div class="rfi-thumb-wrapper"><img src="${escapeHtml(item.rImage)}" class="rfi-thumb" title="Bấm để phóng to" onclick="openLightbox('${escapeHtml(item.rImage)}')"></div>` : '';
+      let linkedDocTag = item.linkedDoc ? `<span class="tag" style="background: rgba(3, 105, 161, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3);">🔗 Tham chiếu: ${escapeHtml(item.linkedDoc)}</span>` : '';
+      
+      let editQuestionBtn = (currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin' || currentUser.name === r.author)) ?
+           `<button class="btn btn-ghost btn-sm" style="position: absolute; right: 14px; top: 14px;" onclick="openEditItemModal('${r.id}', '${item.id}', '${escapeHtml(item.question).replace(/'/g, "\\'")}', '${escapeHtml(item.linkedDoc).replace(/'/g, "\\'")}', '${escapeHtml(item.qImage).replace(/'/g, "\\'")}')">✎ Sửa</button>` : '';
+
+      let replyBox = '';
+      if (item.reply) {
+        let editBtn = (currentUser && (currentUser.role === 'manager' || currentUser.role === 'superadmin')) ? 
+            `<button class="btn btn-ghost btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '${escapeHtml(item.reply).replace(/'/g, "\\'")}', '${escapeHtml(item.rImage).replace(/'/g, "\\'")}')">✎ Sửa</button>` : '';
+        
+        replyBox = `<div class="rfi-reply">
+            <div class="rfi-r-title">
+              <span>Phản hồi (${item.replyDate}):</span>
+              ${editBtn}
+            </div>
+            <div class="rfi-r-text">${escapeHtml(item.reply)}</div>
+            ${rThumb}
+          </div>`;
+      } else {
+        replyBox = `<div class="rfi-pending-reply">
+            <span style="font-size:13px; font-weight:700; color:var(--amber);">⏳ Đang chờ trả lời...</span>
+            ${currentUser ? `<button class="btn btn-primary btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '', '')">✏️ Cập nhật trả lời</button>` : ''}
+          </div>`;
+      }
+
+      return `<div class="rfi-item"><div class="rfi-question"><div class="rfi-q-title">MỤC SỐ ${idx + 1} ${linkedDocTag}</div><div class="rfi-q-text">${escapeHtml(item.question)}</div>${qThumb}${editQuestionBtn}</div>${replyBox}</div>`;
+    }).join('');
+
+    return `<div class="rfi-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;">
+          <div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${r.date} | Người tạo: ${escapeHtml(r.author)}</div></div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div>
+        </div>
+        <div class="rfi-item-list">${itemsHtml}</div>
+        ${currentUser ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}
+      </div>`;
+  }).join('');
+
+  return `<div class="toolbar-row1" style="margin-bottom: 24px; margin-top:20px;">
+      <div class="search-box"><span>🔍</span><input type="text" placeholder="Tìm nội dung vướng mắc, mã bản vẽ..."></div>
+      <button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ</button>
+      ${currentUser ? `<button class="btn btn-primary" onclick="openCreateRfiModal()">＋ Tạo Công văn / RFI mới</button>` : ''}
+    </div><div class="rfi-timeline">${rfiHtml}</div>`;
+}
 
 // Tab 1: Danh sách
 function renderDocRow(d){
@@ -1130,7 +1499,7 @@ function savePlan(){
 }
 
 window.onload = async function() { 
-  try { await loadAll(); } catch(err) { loadFromLocalStorage(); } finally { render(); } 
+  try { await loadAll(); } catch(err) { } finally { render(); } 
 };
 </script>
 </body>
