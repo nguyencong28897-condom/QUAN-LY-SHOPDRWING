@@ -460,8 +460,8 @@
 
 <script>
 // =======================================================================
-// LƯU Ý TỐI QUAN TRỌNG: THAY ĐƯỜNG LINK API APP SCRIPT CỦA BẠN VÀO ĐÂY!!!
-// ĐẢM BẢO ĐÃ "DEPLOY -> NEW VERSION" TRÊN GOOGLE APP SCRIPT TRƯỚC KHI LẤY LINK
+// BƯỚC DUY NHẤT CẦN LÀM: THAY ĐƯỜNG LINK API APP SCRIPT CỦA BẠN VÀO ĐÂY!!!
+// ĐẢM BẢO ĐÃ "DEPLOY -> NEW VERSION" TRÊN GOOGLE APP SCRIPT TỪ BƯỚC TRƯỚC
 // =======================================================================
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
@@ -494,7 +494,7 @@ function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 
-// ================= PHÂN QUYỀN CHUẨN XÁC (Sửa triệt để lỗi không hiện nút) =================
+// ================= PHÂN QUYỀN CHUẨN XÁC =================
 function getUserRole() { return currentUser && currentUser.role ? String(currentUser.role).toLowerCase().trim() : ''; }
 function isSuperAdmin(){ const r = getUserRole(); return r.includes('super') || r.includes('admin'); }
 function isManager(){ const r = getUserRole(); return r.includes('manager') || r.includes('trưởng') || isSuperAdmin(); }
@@ -509,7 +509,7 @@ function canUpdateProgress(docAssignee) {
 }
 function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
 function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
-// ==========================================================================================
+// =========================================================
 
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
@@ -565,14 +565,27 @@ function renderAuthArea(){
 
 function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 
+function parseDateToIso(d) {
+  if (!d) return ''; let s = String(d).trim(); 
+  if (s.includes('T')) { const cleanMatch = s.match(/(\d{4}-\d{2}-\d{2})/); if(cleanMatch) s = cleanMatch[1]; else s = s.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, ''); }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const p = s.split(/[\/\-]/);
+  if (p.length === 3) { if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } return s;
+}
+
+// ================= FIX LỖI NGÀY THÁNG TRONG RFI =================
 function parseRowsToRfis(rows) {
   let rfiMap = {};
   for (let i = 1; i < rows.length; i++) {
     let cols = rows[i]; if (!cols || !cols[0]) continue; let rId = cols[0];
-    if (!rfiMap[rId]) rfiMap[rId] = { id: rId, code: cols[1], title: cols[2], date: cols[3], author: cols[4], status: cols[12], items: [] };
-    rfiMap[rId].items.push({ id: cols[5], linkedDoc: cols[6], question: cols[7], qImage: cols[8], reply: cols[9], rImage: cols[10], replyDate: cols[11] });
+    let ngayTaoChuan = fmtDate(parseDateToIso(cols[3]));
+    let ngayPhanHoiChuan = fmtDate(parseDateToIso(cols[11]));
+    
+    if (!rfiMap[rId]) rfiMap[rId] = { id: rId, code: cols[1], title: cols[2], date: ngayTaoChuan, author: cols[4], status: cols[12], items: [] };
+    rfiMap[rId].items.push({ id: cols[5], linkedDoc: cols[6], question: cols[7], qImage: cols[8], reply: cols[9], rImage: cols[10], replyDate: ngayPhanHoiChuan });
   } return Object.values(rfiMap).reverse(); 
 }
+// ===============================================================
 
 async function loadAll(){
   categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories); groups = safeJSON(localStorage.getItem(GROUP_KEY), groups); plans = safeJSON(localStorage.getItem(PLAN_KEY), plans);
@@ -588,14 +601,6 @@ async function loadAll(){
       }
     }
   } catch (err) { }
-}
-
-function parseDateToIso(d) {
-  if (!d) return ''; let s = String(d).trim(); 
-  if (s.includes('T')) { const cleanMatch = s.match(/(\d{4}-\d{2}-\d{2})/); if(cleanMatch) s = cleanMatch[1]; else s = s.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, ''); }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const p = s.split(/[\/\-]/);
-  if (p.length === 3) { if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } return s;
 }
 
 function parseRowsToDocs(rows) {
@@ -782,12 +787,11 @@ function renderRfiView() {
       }
       return `<div class="rfi-item"><div class="rfi-question"><div class="rfi-q-title"><div style="display:flex; align-items:center; gap:8px;">MỤC SỐ ${idx + 1} ${linkedDocTag}</div>${editQuestionBtn}</div><div class="rfi-q-text">${escapeHtml(item.question)}</div>${qThumb}</div>${replyBox}</div>`;
     }).join('');
-    return `<div class="rfi-card"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;"><div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${r.date} | Người tạo: ${escapeHtml(r.author)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div></div><div class="rfi-item-list">${itemsHtml}</div>${(currentUser && !isGuest()) ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}</div>`;
+    return `<div class="rfi-card"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;"><div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${escapeHtml(r.date)} | Người tạo: ${escapeHtml(r.author)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div></div><div class="rfi-item-list">${itemsHtml}</div>${(currentUser && !isGuest()) ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}</div>`;
   }).join('');
   return `<div class="toolbar-row1" style="margin-bottom: 24px; margin-top:20px;"><div class="search-box"><span>🔍</span><input type="text" placeholder="Tìm nội dung vướng mắc, mã bản vẽ..."></div><button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ</button>${(currentUser && !isGuest()) ? `<button class="btn btn-primary" onclick="openCreateRfiModal()">＋ Tạo Công văn / RFI mới</button>` : ''}</div><div class="rfi-timeline">${rfiHtml}</div>`;
 }
 
-// BẢN SỬA LỖI: HIỂN THỊ ĐÚNG CÁC NÚT BẤM CHO QUẢN TRỊ VIÊN Ở DANH SÁCH
 function renderDocRow(d){
   const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0; const is1Step = d.workflow === '1-buoc';
   return `
@@ -838,7 +842,6 @@ function renderListView(){
   `;
 }
 
-// BẢN SỬA LỖI: HIỂN THỊ ĐÚNG CÁC NÚT BẤM CHO QUẢN TRỊ VIÊN Ở MÀN HÌNH CHI TIẾT
 function renderDetailView(){
   const d = docs.find(x => x.id === selectedId); if(!d) { goBack(); return ''; }
   const sorted = sortedRounds(d).reverse(), latest = sorted[0], currentOverdue = latest ? overdueDays(latest, d) : 0, approvedCount = (d.rounds||[]).filter(r => overallStatus(r, d) === 'da-duyet' || overallStatus(r, d) === 'duyet-ghi-chu').length; const is1Step = d.workflow === '1-buoc';
@@ -1077,7 +1080,7 @@ async function saveDoc(){
 
 function openRoundModal(dId, rId){
   const d = docs.find(x => x.id === dId); if(!d) { alert('Không tìm thấy hồ sơ!'); return; }
-  if(!canUpdateProgress(d.assignee)) { alert(`Bạn không có quyền chỉnh sửa/trình duyệt bản vẽ này!`); return; }
+  if(!canUpdateProgress(d.assignee) && !isSuperAdmin()) { alert(`Bạn không có quyền chỉnh sửa/trình duyệt bản vẽ này!`); return; }
   
   editingRoundId = rId || null;
   const modal = document.getElementById('roundModal'); modal.dataset.docId = d.id; modal.dataset.docCode = d.code; document.getElementById('roundDocIdHidden').value = d.id;
@@ -1152,7 +1155,6 @@ function savePlan(){
   savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
 }
 
-// ================= TỰ ĐỘNG CHUẨN HÓA QUYỀN ĐỂ KHÔNG BỊ KẸT CACHE NỮA =================
 window.onload = async function() { 
   if (currentUser && currentUser.token) {
      let r = String(currentUser.role).toLowerCase();
