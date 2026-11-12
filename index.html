@@ -31,7 +31,7 @@
   * { box-sizing: border-box; } 
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Manrope', sans-serif; min-height: 100vh; transition: background 0.3s, color 0.3s; }
   
-  /* ================= CSS MÀN HÌNH ĐĂNG NHẬP CHÍNH (GIAO DIỆN DARK + LED RGB) ================= */
+  /* ================= CSS MÀN HÌNH ĐĂNG NHẬP CHÍNH ================= */
   .full-page-login { position: fixed; inset: 0; background: linear-gradient(120deg, #0F172A 0%, #0B0F19 50%, #111827 100%); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; font-family: 'Manrope', sans-serif; }
   .login-card-wrapper { position: relative; border-radius: 20px; z-index: 1; width: 100%; max-width: 420px; }
   .login-card-wrapper::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000); background-size: 400%; z-index: -1; border-radius: 22px; animation: rgbGlow 12s linear infinite; filter: blur(5px); }
@@ -92,6 +92,10 @@
   .btn-date-quick { padding: 4px 8px; font-size: 11px; font-weight: 700; border-radius: 6px; background: var(--gray-bg); color: var(--ink-light); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
   .btn-date-quick:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
   
+  /* NÚT MỞ DRIVE MỚI */
+  .btn-drive-link { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; font-size: 10px; font-weight: 800; border-radius: 6px; background: rgba(56, 189, 248, 0.1); color: var(--primary); text-decoration: none; border: 1px solid rgba(56, 189, 248, 0.3); transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
+  .btn-drive-link:hover { background: var(--primary); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); }
+
   .auto-sync-status { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--green); font-weight: 700; background: var(--green-bg); padding: 7px 12px; border-radius: 999px; margin-left: auto; }
   .auto-sync-status.updating { color: var(--amber); background: var(--amber-bg); }
   .list-count { margin: 12px 2px 8px; font-size: 12px; color: var(--ink-light); font-weight: 600; }
@@ -134,6 +138,7 @@
   .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
   .field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink-light); margin-bottom: 4px; }
   .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 13.5px; transition: 0.2s; }
+  .field input[readonly], .field textarea[readonly] { background: var(--gray-bg); color: var(--ink-light); cursor: not-allowed; border-color: transparent; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
   .field input.error, .field textarea.error { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2); background: rgba(248, 113, 113, 0.05); }
   .field-row { display: flex; gap: 10px; } .field-row .field { flex: 1; }
@@ -183,7 +188,7 @@
 </head>
 <body data-theme="dark">
 
-  <!-- ================= MÀN HÌNH ĐĂNG NHẬP (GATEKEEPER - CÓ LED RGB) ================= -->
+  <!-- ================= MÀN HÌNH ĐĂNG NHẬP (GATEKEEPER) ================= -->
   <div id="fullPageLogin" class="full-page-login">
     <div class="login-card-wrapper">
       <div class="login-card">
@@ -216,7 +221,7 @@
     </div>
   </div>
 
-  <!-- ================= TOÀN BỘ APP CHÍNH (BỊ ẨN KHI CHƯA LOGIN) ================= -->
+  <!-- ================= TOÀN BỘ APP CHÍNH ================= -->
   <div id="mainAppWrapper" style="display: none;">
       <div class="hero">
         <div class="hero-inner">
@@ -248,19 +253,18 @@
       <div class="modal-overlay" id="docModal"><div class="modal">
         <div class="modal-head"><h3 id="docModalTitle">Thêm Bản vẽ / Kế hoạch</h3><button class="modal-close" onclick="closeModal('docModal')">✕</button></div>
         <div class="modal-body">
-          <div class="field"><label>Mã số bản vẽ *</label><input type="text" id="docCode" placeholder="VD: SDS-001 hoặc MSS-01" oninput="this.classList.remove('error')"></div>
           <div class="field-row">
             <div class="field"><label>Loại (Shopdrawing / Biện pháp)</label>
-              <select id="docTypeSelect">
+              <!-- AUTO INCREMENT KHÍ ĐỔI LOẠI -->
+              <select id="docTypeSelect" onchange="if(!editingDocId) document.getElementById('docCode').value = generateNextCode(this.value); popSel('docCategory', categories[this.value].map(c=>({val:c, lbl:c})), '', '— Chọn hạng mục —');">
                 <option value="shopdrawing">📐 Shopdrawing (SDS)</option>
                 <option value="bienphap">📋 Biện pháp thi công (MSS)</option>
               </select>
             </div>
-            <div class="field"><label>Hạng mục</label><div class="cat-manage-row"><select id="docCategory"></select><button type="button" class="btn btn-ghost btn-sm" onclick="quickAddCategory()">＋</button></div></div>
+            <div class="field"><label>Mã số tự động *</label><input type="text" id="docCode" placeholder="VD: SDS-001 hoặc MSS-01" oninput="this.classList.remove('error')"></div>
           </div>
-          <div class="field"><label>Tên bản vẽ / biện pháp *</label><input type="text" id="docName" oninput="this.classList.remove('error')"></div>
           <div class="field-row">
-            <div class="field"><label>Nhân sự thực hiện</label><div class="cat-manage-row"><select id="docAssignee"></select></div></div>
+            <div class="field"><label>Hạng mục</label><div class="cat-manage-row"><select id="docCategory"></select><button type="button" class="btn btn-ghost btn-sm" onclick="quickAddCategory()">＋</button></div></div>
             <div class="field">
               <label>Quy trình trình duyệt *</label>
               <select id="docWorkflow">
@@ -269,13 +273,15 @@
               </select>
             </div>
           </div>
+          <div class="field"><label>Tên bản vẽ / biện pháp *</label><input type="text" id="docName" oninput="this.classList.remove('error')"></div>
           <div class="field-row">
+            <div class="field"><label>Nhân sự thực hiện</label><div class="cat-manage-row"><select id="docAssignee"></select></div></div>
             <div class="field">
                 <label>Ngày Kế hoạch xong <button type="button" class="btn-date-quick" onclick="document.getElementById('docPlanDate').value = todayIso()">Hôm nay</button></label>
                 <input type="date" id="docPlanDate">
             </div>
-            <div class="field"><label>Ghi chú / Mô tả</label><input type="text" id="docDesc"></div>
           </div>
+          <div class="field"><label>Ghi chú / Mô tả</label><input type="text" id="docDesc"></div>
         </div>
         <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('docModal')">Hủy</button><button class="btn btn-primary" id="btnSaveDoc" onclick="saveDoc()">💾 Lưu (Đồng bộ Google Sheet)</button></div>
       </div></div>
@@ -303,7 +309,11 @@
           </div>
 
           <div class="field">
-            <label>Link file hồ sơ nộp trình (PDF/CAD) *</label>
+            <label>
+              <span>Link file hồ sơ nộp trình (PDF/CAD) *</span>
+              <!-- NÚT MỞ NHANH FOLDER DRIVE CỦA DỰ ÁN -->
+              <a href="https://drive.google.com/drive/folders/1139hXi-ctFs5mcVdAqrNaSGV4I4BrSoQ?usp=sharing" target="_blank" class="btn-drive-link" title="Mở Drive để tải file lên">☁️ Mở Drive Dự Án</a>
+            </label>
             <input type="text" id="roundFileLink" placeholder="Dán link Google Drive bản vẽ..." oninput="this.classList.remove('error')">
           </div>
 
@@ -337,7 +347,11 @@
           <div class="field"><label>Ghi chú / Nhận xét của TVGS & BQL</label><textarea id="roundNote" rows="2"></textarea></div>
 
           <div class="field" style="margin-top:10px; border-top:1px dashed var(--border); padding-top:12px;">
-            <label style="color:var(--green);">Link bản vẽ ĐÃ DUYỆT CUỐI CÙNG (PDF)</label>
+            <label style="color:var(--green);">
+              <span>Link bản vẽ ĐÃ DUYỆT CUỐI CÙNG (PDF)</span>
+              <!-- NÚT MỞ NHANH FOLDER DRIVE CỦA DỰ ÁN -->
+              <a href="https://drive.google.com/drive/folders/1139hXi-ctFs5mcVdAqrNaSGV4I4BrSoQ?usp=sharing" target="_blank" class="btn-drive-link" style="color:var(--green); border-color:var(--green); background:rgba(52, 211, 153, 0.1);" title="Mở Drive để tải bản duyệt lên">☁️ Mở Drive Dự Án</a>
+            </label>
             <input type="text" id="roundApprovedLink" placeholder="Chỉ nhập khi TVGS/BQL đã chốt bản cuối cùng...">
           </div>
 
@@ -349,16 +363,18 @@
       <div class="modal-overlay" id="planModal"><div class="modal">
         <div class="modal-head"><h3 id="planModalTitle">Mục kế hoạch (Thủ công)</h3><button class="modal-close" onclick="closeModal('planModal')">✕</button></div>
         <div class="modal-body">
-          <div class="field"><label>Tên công việc / Bản vẽ *</label><input type="text" id="planTitle" oninput="this.classList.remove('error')"></div>
+          <div class="field"><label>Link với Hồ sơ có sẵn</label><select id="planLinkedDoc" onchange="togglePlanManualStatus()"></select></div>
           <div class="field-row">
             <div class="field"><label>Mã tham chiếu</label><input type="text" id="planCode"></div>
+            <div class="field"><label>Tên công việc / Bản vẽ *</label><input type="text" id="planTitle" oninput="this.classList.remove('error')"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Nhân sự thực hiện</label><select id="planAssignee"></select></div>
             <div class="field">
                 <label>Ngày duyệt xong * <button type="button" class="btn-date-quick" onclick="document.getElementById('planDate').value = todayIso(); document.getElementById('planDate').classList.remove('error');">Hôm nay</button></label>
                 <input type="date" id="planDate" oninput="this.classList.remove('error')">
             </div>
           </div>
-          <div class="field"><label>Nhân sự thực hiện</label><select id="planAssignee"></select></div>
-          <div class="field"><label>Link với Hồ sơ có sẵn</label><select id="planLinkedDoc" onchange="togglePlanManualStatus()"></select></div>
           <div class="field" id="planManualStatusField"><label>Trạng thái ảo</label><select id="planManualStatus"><option value="chua-trinh">Chưa trình</option><option value="dang-xu-ly">Đang chờ duyệt</option><option value="hoan-thanh">Đã duyệt xong</option></select></div>
         </div>
         <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('planModal')">Hủy</button><button class="btn btn-primary" onclick="savePlan()">💾 Lưu</button></div>
@@ -396,7 +412,10 @@
           <div class="field"><label>Chủ đề chung *</label><input type="text" id="newRfiTitle" placeholder="VD: Thay đổi thiết kế dầm tầng 2"></div>
           <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
           <div class="field"><label style="color: var(--cyan);">Nội dung (Mục 1) *</label><textarea id="newRfiQuestion" rows="2" placeholder="Mô tả chi tiết lỗi hoặc vướng mắc..."></textarea></div>
-          <div class="field"><label>🔗 Liên kết với Bản vẽ</label><input type="text" id="newRfiLinkedDoc" placeholder="Mã bản vẽ (VD: SDS-002)..."></div>
+          <div class="field">
+             <label>🔗 Liên kết với Bản vẽ</label>
+             <select id="newRfiLinkedDoc"></select>
+          </div>
           <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
             <div class="paste-area" id="pasteArea" tabindex="0">
               <div class="paste-area-text" id="pasteHint">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
@@ -412,7 +431,10 @@
         <div class="modal-head"><h3>＋ Thêm Mục Hỏi Mới</h3><button class="modal-close" onclick="closeModal('addItemModal')">✕</button></div>
         <div class="modal-body">
           <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc bổ sung *</label><textarea id="addItemQuestion" rows="3" placeholder="Nhập câu hỏi tiếp theo..."></textarea></div>
-          <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="addItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+          <div class="field">
+              <label>🔗 Liên kết bản vẽ</label>
+              <select id="addItemLinkedDoc"></select>
+          </div>
           <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
             <div class="paste-area" id="pasteArea_add" tabindex="0">
               <div class="paste-area-text" id="pasteHint_add">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh</div>
@@ -428,7 +450,10 @@
         <div class="modal-head"><h3>✎ Sửa Nội Dung Mục</h3><button class="modal-close" onclick="closeModal('editItemModal')">✕</button></div>
         <div class="modal-body">
           <div class="field"><label style="color: var(--cyan);">Nội dung vướng mắc *</label><textarea id="editItemQuestion" rows="3" placeholder="Nhập nội dung..."></textarea></div>
-          <div class="field"><label>🔗 Liên kết bản vẽ</label><input type="text" id="editItemLinkedDoc" placeholder="Mã bản vẽ..."></div>
+          <div class="field">
+              <label>🔗 Liên kết bản vẽ</label>
+              <select id="editItemLinkedDoc"></select>
+          </div>
           <div class="field"><label>Đính kèm hình ảnh (Ctrl + V)</label>
             <div class="paste-area" id="pasteArea_edit" tabindex="0">
               <div class="paste-area-text" id="pasteHint_edit">🖱️ Click vào đây và bấm <b>Ctrl + V</b> để dán ảnh mới (sẽ ghi đè ảnh cũ)</div>
@@ -460,8 +485,7 @@
 
 <script>
 // =======================================================================
-// BƯỚC DUY NHẤT CẦN LÀM: THAY ĐƯỜNG LINK API APP SCRIPT CỦA BẠN VÀO ĐÂY!!!
-// ĐẢM BẢO ĐÃ "DEPLOY -> NEW VERSION" TRÊN GOOGLE APP SCRIPT TỪ BƯỚC TRƯỚC
+// LINK CỦA BẠN ĐÃ ĐƯỢC GIỮ NGUYÊN (KHÔNG CẦN THAY)
 // =======================================================================
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
@@ -470,16 +494,14 @@ const TYPE_META = { shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, bie
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
 
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] };
-let accounts = []; 
-let settings = { defaultSla: 3 };
+let accounts = []; let settings = { defaultSla: 3 };
 let currentType = 'shopdrawing', currentView = 'docs', statsType = 'all', viewState = 'list';
 let planFilterType = 'all'; 
 let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId = null;
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', filterAssignee = 'all';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
 let currentUser = safeJSON(sessionStorage.getItem(ADMIN_SESSION_KEY), null);
-let rfis = [];
-let tempImageBase64 = null; let activeRfiId = null; let activeItemId = null;
+let rfis = []; let tempImageBase64 = null; let activeRfiId = null; let activeItemId = null;
 
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
 function makeStableDocId(code, name) { return 'doc_' + encodeURIComponent(((code||'')+'_'+(name||'')).trim().toLowerCase()).replace(/[^a-zA-Z0-9_-]/g, '_'); }
@@ -494,7 +516,23 @@ function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 
-// ================= PHÂN QUYỀN CHUẨN XÁC =================
+// ================= TỰ ĐỘNG SINH MÃ =================
+function generateNextCode(type) {
+  const typeDocs = docs.filter(d => d.type === type);
+  let maxNum = 0;
+  typeDocs.forEach(d => {
+    const match = (d.code || '').match(/\d+$/); 
+    if (match) {
+      const num = parseInt(match[0], 10);
+      if (num > maxNum) maxNum = num;
+    }
+  });
+  const nextNum = maxNum + 1;
+  if (type === 'shopdrawing') return 'SDS-' + String(nextNum).padStart(3, '0');
+  return 'MSS-' + String(nextNum).padStart(2, '0');
+}
+
+// ================= PHÂN QUYỀN =================
 function getUserRole() { return currentUser && currentUser.role ? String(currentUser.role).toLowerCase().trim() : ''; }
 function isSuperAdmin(){ const r = getUserRole(); return r.includes('super') || r.includes('admin'); }
 function isManager(){ const r = getUserRole(); return r.includes('manager') || r.includes('trưởng') || isSuperAdmin(); }
@@ -509,7 +547,7 @@ function canUpdateProgress(docAssignee) {
 }
 function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
 function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
-// =========================================================
+// ===============================================
 
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
@@ -573,19 +611,15 @@ function parseDateToIso(d) {
   if (p.length === 3) { if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } return s;
 }
 
-// ================= FIX LỖI NGÀY THÁNG TRONG RFI =================
 function parseRowsToRfis(rows) {
   let rfiMap = {};
   for (let i = 1; i < rows.length; i++) {
     let cols = rows[i]; if (!cols || !cols[0]) continue; let rId = cols[0];
-    let ngayTaoChuan = fmtDate(parseDateToIso(cols[3]));
-    let ngayPhanHoiChuan = fmtDate(parseDateToIso(cols[11]));
-    
+    let ngayTaoChuan = fmtDate(parseDateToIso(cols[3])), ngayPhanHoiChuan = fmtDate(parseDateToIso(cols[11]));
     if (!rfiMap[rId]) rfiMap[rId] = { id: rId, code: cols[1], title: cols[2], date: ngayTaoChuan, author: cols[4], status: cols[12], items: [] };
     rfiMap[rId].items.push({ id: cols[5], linkedDoc: cols[6], question: cols[7], qImage: cols[8], reply: cols[9], rImage: cols[10], replyDate: ngayPhanHoiChuan });
   } return Object.values(rfiMap).reverse(); 
 }
-// ===============================================================
 
 async function loadAll(){
   categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories); groups = safeJSON(localStorage.getItem(GROUP_KEY), groups); plans = safeJSON(localStorage.getItem(PLAN_KEY), plans);
@@ -721,7 +755,9 @@ function removePastedImage(type, e) {
 }
 
 function openCreateRfiModal() {
-  document.getElementById('newRfiCode').value = ''; document.getElementById('newRfiTitle').value = ''; document.getElementById('newRfiQuestion').value = ''; document.getElementById('newRfiLinkedDoc').value = ''; removePastedImage('new'); document.getElementById('createRfiModal').classList.add('open');
+  document.getElementById('newRfiCode').value = ''; document.getElementById('newRfiTitle').value = ''; document.getElementById('newRfiQuestion').value = ''; 
+  popSel('newRfiLinkedDoc', docs.map(d=>({val: d.code, lbl: `[${d.code}] ${d.name}`})), '', '— Không liên kết / Chọn bản vẽ —');
+  removePastedImage('new'); document.getElementById('createRfiModal').classList.add('open');
 }
 
 async function saveNewRfi() {
@@ -733,7 +769,9 @@ async function saveNewRfi() {
 }
 
 function openAddItemModal(rfiId) {
-  activeRfiId = rfiId; document.getElementById('addItemQuestion').value = ''; document.getElementById('addItemLinkedDoc').value = ''; removePastedImage('add'); document.getElementById('addItemModal').classList.add('open');
+  activeRfiId = rfiId; document.getElementById('addItemQuestion').value = ''; 
+  popSel('addItemLinkedDoc', docs.map(d=>({val: d.code, lbl: `[${d.code}] ${d.name}`})), '', '— Không liên kết / Chọn bản vẽ —');
+  removePastedImage('add'); document.getElementById('addItemModal').classList.add('open');
 }
 
 async function saveNewItem() {
@@ -744,7 +782,9 @@ async function saveNewItem() {
 }
 
 function openEditItemModal(rfiId, itemId, existingQuestion, existingLinkedDoc, existingQImage) {
-  activeRfiId = rfiId; activeItemId = itemId; document.getElementById('editItemQuestion').value = existingQuestion || ''; document.getElementById('editItemLinkedDoc').value = existingLinkedDoc || ''; loadExistingImageToPasteArea('edit', existingQImage); document.getElementById('editItemModal').classList.add('open');
+  activeRfiId = rfiId; activeItemId = itemId; document.getElementById('editItemQuestion').value = existingQuestion || ''; 
+  popSel('editItemLinkedDoc', docs.map(d=>({val: d.code, lbl: `[${d.code}] ${d.name}`})), existingLinkedDoc, '— Không liên kết / Chọn bản vẽ —');
+  loadExistingImageToPasteArea('edit', existingQImage); document.getElementById('editItemModal').classList.add('open');
 }
 
 async function saveEditedItem() {
@@ -1044,13 +1084,18 @@ function quickAddCategory(){
   if(c && c.trim()){ const clean = c.trim(); if(!categories[currentType].includes(clean)){ categories[currentType].push(clean); saveCategories(); } popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —'); }
 }
 
+// ================= TỰ ĐỘNG ĐIỀN MÃ KHI THÊM MỚI =================
 async function openDocModal(id, isPlanMode=false){
   if(!requireManagerAction()) return;
   editingDocId = id || null; const d = id ? (docs.find(x=>x.id===id) || {}) : {};
   document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : 'Thêm hồ sơ mới';
-  document.getElementById('docCode').value = d.code||''; document.getElementById('docName').value = d.name||''; 
-  document.getElementById('docPlanDate').value = d.plannedDate||(isPlanMode?todayIso():''); document.getElementById('docDesc').value = d.desc||'';
   const targetTypeCat = d.type || currentType; document.getElementById('docTypeSelect').value = targetTypeCat;
+  
+  // Tự động nhảy số hoặc điền mã cũ nếu đang sửa
+  document.getElementById('docCode').value = id ? (d.code||'') : generateNextCode(targetTypeCat);
+  
+  document.getElementById('docName').value = d.name||''; 
+  document.getElementById('docPlanDate').value = d.plannedDate||(isPlanMode?todayIso():''); document.getElementById('docDesc').value = d.desc||'';
   popSel('docCategory', categories[targetTypeCat].map(c=>({val:c, lbl:c})), d.category, '— Chọn hạng mục —'); 
   popSel('docAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), d.assignee, '— Chọn người phụ trách —');
   document.getElementById('docWorkflow').value = d.workflow || '2-buoc';
@@ -1143,10 +1188,28 @@ async function saveRound(){
 function openPlanModal(){
   if(!requireManagerAction()) return;
   document.getElementById('planTitle').value = ''; document.getElementById('planCode').value = ''; document.getElementById('planDate').value = todayIso();
-  popSel('planAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), '', '— Chọn nhân sự —'); popSel('planLinkedDoc', docs.map(d=>({val:d.id, lbl:`[${d.type==='bienphap'?'MSS':'SDS'}] ${d.code} - ${d.name}`})), '', '— Không liên kết —');
+  document.getElementById('planTitle').readOnly = false; document.getElementById('planCode').readOnly = false;
+  popSel('planAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), '', '— Chọn nhân sự —'); 
+  popSel('planLinkedDoc', docs.map(d=>({val:d.id, lbl:`[${d.code}] ${d.name}`})), '', '— Không liên kết —');
   document.getElementById('planModal').classList.add('open');
 }
-function togglePlanManualStatus(){ document.getElementById('planManualStatusField').style.display = document.getElementById('planLinkedDoc').value ? 'none' : 'block'; }
+
+// ================= AUTO FILL Ở MỤC KẾ HOẠCH =================
+function togglePlanManualStatus(){ 
+  const sel = document.getElementById('planLinkedDoc');
+  document.getElementById('planManualStatusField').style.display = sel.value ? 'none' : 'block'; 
+  if(sel.value) {
+    const d = docs.find(x => x.id === sel.value);
+    if(d) {
+      document.getElementById('planTitle').value = d.name; document.getElementById('planCode').value = d.code;
+      document.getElementById('planTitle').readOnly = true; document.getElementById('planCode').readOnly = true;
+    }
+  } else {
+    document.getElementById('planTitle').value = ''; document.getElementById('planCode').value = '';
+    document.getElementById('planTitle').readOnly = false; document.getElementById('planCode').readOnly = false;
+  }
+}
+
 function savePlan(){
   const titleEl = document.getElementById('planTitle'), dateEl = document.getElementById('planDate');
   if(!titleEl.value.trim()){ titleEl.classList.add('error'); return; } if(!dateEl.value){ dateEl.classList.add('error'); return; }
