@@ -33,16 +33,9 @@
   
   /* ================= CSS MÀN HÌNH ĐĂNG NHẬP CHÍNH (GIAO DIỆN DARK + LED RGB) ================= */
   .full-page-login { position: fixed; inset: 0; background: linear-gradient(120deg, #0F172A 0%, #0B0F19 50%, #111827 100%); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; font-family: 'Manrope', sans-serif; }
-  
   .login-card-wrapper { position: relative; border-radius: 20px; z-index: 1; width: 100%; max-width: 420px; }
-  .login-card-wrapper::before {
-    content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-    background-size: 400%; z-index: -1; border-radius: 22px;
-    animation: rgbGlow 12s linear infinite; filter: blur(5px);
-  }
+  .login-card-wrapper::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000); background-size: 400%; z-index: -1; border-radius: 22px; animation: rgbGlow 12s linear infinite; filter: blur(5px); }
   @keyframes rgbGlow { 0% { background-position: 0 0; } 50% { background-position: 400% 0; } 100% { background-position: 0 0; } }
-
   .login-card { background: var(--surface); border-radius: 18px; padding: 40px 32px; position: relative; z-index: 2; border: 1px solid rgba(255,255,255,0.05); }
   .login-logo { text-align: center; margin-bottom: 24px; }
   .login-logo-text { font-size: 46px; font-weight: 800; color: #fff; letter-spacing: -2px; margin-bottom: 4px; line-height: 1; text-shadow: 0 0 15px var(--primary); }
@@ -50,14 +43,12 @@
   .login-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; text-align: center; }
   .login-subtitle { font-size: 13px; color: var(--ink-light); margin-bottom: 24px; font-weight: 600; text-align: center; }
   .login-alert { background: rgba(248, 113, 113, 0.1); color: #FCA5A5; padding: 14px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 24px; display: none; border: 1px solid rgba(248, 113, 113, 0.3); text-align: center;}
-  
   .login-field { margin-bottom: 20px; }
   .login-field label { display: block; font-size: 12px; font-weight: 800; color: var(--ink-light); margin-bottom: 8px; }
   .login-input-wrap { position: relative; }
   .login-input-wrap input { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; transition: 0.2s; outline: none; background: rgba(0,0,0,0.2); color: #fff; font-weight: 600; }
   .login-input-wrap input:focus { border-color: var(--cyan); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15); }
   .login-eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--ink-light); background: none; border: none; font-size: 18px; outline: none; }
-  
   .btn-login-main { width: 100%; background: linear-gradient(120deg, var(--primary), #1E4FE0); color: #fff; border: none; border-radius: 8px; padding: 16px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 10px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
   .btn-login-main:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4); }
   .btn-login-main:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
@@ -74,7 +65,6 @@
   .brand-mark { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #22D3EE, #38BDF8); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 14px rgba(23,195,232,0.3); color:#0B0F19; }
   .brand-text .eyebrow { font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; color: #9FC3FF; font-weight: 700; }
   .brand-text h1 { margin: 2px 0 0; font-size: 19px; font-weight: 800; }
-  
   .hero-stats { display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
   .hero-stat .num { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
   .hero-stat .num.alert { color: #FF8A8A; }
@@ -104,12 +94,10 @@
   
   .auto-sync-status { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--green); font-weight: 700; background: var(--green-bg); padding: 7px 12px; border-radius: 999px; margin-left: auto; }
   .auto-sync-status.updating { color: var(--amber); background: var(--amber-bg); }
-  
   .list-count { margin: 12px 2px 8px; font-size: 12px; color: var(--ink-light); font-weight: 600; }
   .group-block { margin-bottom: 14px; }
   .group-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface); border-radius: 10px; cursor: pointer; border: 1px solid var(--border); font-weight: 800; font-size: 13px; }
   .group-items { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-  
   .doc-list { display: flex; flex-direction: column; gap: 8px; }
   .doc-row { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; transition: 0.2s; }
   .doc-row:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -137,7 +125,6 @@
   
   .btn-download-file { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(56, 189, 248, 0.3); transition: all 0.2s ease; margin-top:10px; }
   .btn-download-file:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
@@ -149,7 +136,6 @@
   .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 13.5px; transition: 0.2s; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
   .field input.error, .field textarea.error { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2); background: rgba(248, 113, 113, 0.05); }
-  
   .field-row { display: flex; gap: 10px; } .field-row .field { flex: 1; }
   .cat-manage-row { display: flex; gap: 6px; } .cat-manage-row select { flex: 1; }
   .approver-block { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
@@ -166,34 +152,26 @@
   .kpi-box .num { font-size: 24px; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
   .kpi-box .lbl { font-size: 11px; color: var(--ink-light); text-transform: uppercase; font-weight: 700; }
   .empty-state { padding: 40px 20px; text-align: center; color: var(--ink-faint); font-weight: 600; border: 1px dashed var(--border); border-radius: 12px; }
-
-  /* ================= CSS TÍNH NĂNG RFI ================= */
+  
   .rfi-timeline { margin-top: 20px; display: flex; flex-direction: column; gap: 20px; }
   .rfi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
   .rfi-card:hover { border-color: var(--primary); }
-  
   .rfi-item-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
   .rfi-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  
   .rfi-question { padding: 14px; border-bottom: 1px dashed var(--border); position: relative; }
   .rfi-q-title { font-size: 11px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .rfi-q-text { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5; }
-  
   .rfi-reply { padding: 14px; background: rgba(52, 211, 153, 0.05); border-left: 3px solid var(--green); position: relative;}
   .rfi-r-title { font-size: 11.5px; font-weight: 800; color: var(--green); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;}
   .rfi-r-text { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
-  
   .rfi-pending-reply { padding: 14px; background: rgba(251, 191, 36, 0.05); border-left: 3px solid var(--amber); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
-  
   .rfi-thumb-wrapper { margin-top: 12px; }
   .rfi-thumb { height: 90px; border-radius: 8px; object-fit: cover; cursor: zoom-in; border: 1px solid var(--border); transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
   .rfi-thumb:hover { border-color: var(--cyan); transform: scale(1.03); }
-  
   .image-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: zoom-out; }
   .image-lightbox.open { display: flex; }
   .image-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,1); object-fit: contain; }
   .lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 24px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-
   .paste-area { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; background: var(--bg); transition: 0.2s; cursor: pointer; position: relative; }
   .paste-area:hover, .paste-area:focus { border-color: var(--primary); background: rgba(56, 189, 248, 0.05); outline: none; }
   .paste-area-text { font-size: 13px; font-weight: 700; color: var(--ink-faint); pointer-events: none; }
@@ -481,17 +459,14 @@
   <div class="toast" id="toast"></div>
 
 <script>
-// LƯU Ý: THAY ĐƯỜNG LINK CỦA BẠN VÀO ĐÂY !!!
+// =======================================================================
+// LƯU Ý TỐI QUAN TRỌNG: THAY ĐƯỜNG LINK API APP SCRIPT CỦA BẠN VÀO ĐÂY!!!
+// ĐẢM BẢO ĐÃ "DEPLOY -> NEW VERSION" TRÊN GOOGLE APP SCRIPT TRƯỚC KHI LẤY LINK
+// =======================================================================
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
 const STORAGE_KEY = 'lhbimDocs', CATEGORY_KEY = 'lhbimCategories', GROUP_KEY = 'lhbimGroups', PLAN_KEY = 'lhbimPlans', ADMIN_SESSION_KEY = 'lhbimUser';
-
-const TYPE_META = { 
-  shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, 
-  bienphap: { label:'Biện pháp thi công (MSS)', icon:'📋' },
-  rfi: { label:'Nhật ký Vướng mắc (RFI)', icon:'📨' }
-};
-
+const TYPE_META = { shopdrawing: { label:'Shopdrawing (SDS)', icon:'📐' }, bienphap: { label:'Biện pháp thi công (MSS)', icon:'📋' }, rfi: { label:'Nhật ký Vướng mắc (RFI)', icon:'📨' } };
 const STATUS_META = { 'cho-duyet': {label:'Đang chờ duyệt', cls:'status-pending', icon:'⏳'}, 'da-duyet': {label:'Đã duyệt', cls:'status-approved', icon:'✅'}, 'duyet-ghi-chu': {label:'Duyệt có ghi chú', cls:'status-approved-note', icon:'📝'}, 'khong-duyet': {label:'Không duyệt', cls:'status-rejected', icon:'❌'} };
 
 let docs = [], categories = { shopdrawing: ['Kết cấu', 'Hoàn thiện', 'MEP'], bienphap: ['Phần ngầm', 'Phần thân', 'An toàn'] }, groups = { shopdrawing: [], bienphap: [] }, plans = { shopdrawing: [], bienphap: [] };
@@ -503,11 +478,8 @@ let selectedId = null, editingRoundId = null, editingDocId = null, editingPlanId
 let searchTerm = '', filterStatus = 'all', filterCategory = 'all', filterGroup = 'all', filterAssignee = 'all';
 let collapsedGroups = new Set(), selectedPlans = new Set(); 
 let currentUser = safeJSON(sessionStorage.getItem(ADMIN_SESSION_KEY), null);
-
 let rfis = [];
-let tempImageBase64 = null; 
-let activeRfiId = null;
-let activeItemId = null;
+let tempImageBase64 = null; let activeRfiId = null; let activeItemId = null;
 
 function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
 function makeStableDocId(code, name) { return 'doc_' + encodeURIComponent(((code||'')+'_'+(name||'')).trim().toLowerCase()).replace(/[^a-zA-Z0-9_-]/g, '_'); }
@@ -522,15 +494,28 @@ function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 
+// ================= PHÂN QUYỀN CHUẨN XÁC (Sửa triệt để lỗi không hiện nút) =================
+function getUserRole() { return currentUser && currentUser.role ? String(currentUser.role).toLowerCase().trim() : ''; }
+function isSuperAdmin(){ const r = getUserRole(); return r.includes('super') || r.includes('admin'); }
+function isManager(){ const r = getUserRole(); return r.includes('manager') || r.includes('trưởng') || isSuperAdmin(); }
+function isGuest(){ const r = getUserRole(); return r.includes('guest') || r.includes('khách'); }
+function isMember(){ return currentUser && !isSuperAdmin() && !isManager() && !isGuest(); }
+
+function canUpdateProgress(docAssignee) { 
+  if (!currentUser || isGuest()) return false; 
+  if (isManager() || isSuperAdmin()) return true; 
+  if (docAssignee && currentUser.name) { return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); } 
+  return false; 
+}
+function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
+function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
+// ==========================================================================================
+
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
   if (dataPayload.action !== 'login') {
-      if (!currentUser || !currentUser.token) {
-          alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
-          executeLogout(); return false;
-      }
-      dataPayload.username = currentUser.username;
-      dataPayload.token = currentUser.token;
+      if (!currentUser || !currentUser.token) { alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!"); executeLogout(); return false; }
+      dataPayload.username = currentUser.username; dataPayload.token = currentUser.token;
   }
   try {
     const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(dataPayload) });
@@ -540,70 +525,26 @@ async function sendDataToGoogleSheet(dataPayload) {
   } catch (e) { return false; }
 }
 
-// ================= HỆ THỐNG PHÂN QUYỀN CHUẨN XÁC (TỰ SỬA LỖI CACHE) =================
-function getUserRole() { 
-  return currentUser && currentUser.role ? String(currentUser.role).toLowerCase().trim() : ''; 
-}
-function isSuperAdmin(){ 
-  const r = getUserRole(); 
-  return r.includes('super') || r.includes('admin'); 
-}
-function isManager(){ 
-  const r = getUserRole(); 
-  return r.includes('manager') || r.includes('trưởng') || isSuperAdmin(); 
-}
-function isGuest(){ 
-  const r = getUserRole(); 
-  return r.includes('guest') || r.includes('khách'); 
-}
-function isMember(){ 
-  return currentUser && !isSuperAdmin() && !isManager() && !isGuest(); 
-}
-
-function canUpdateProgress(docAssignee) { 
-  if (!currentUser || isGuest()) return false; 
-  if (isManager() || isSuperAdmin()) return true; 
-  if (docAssignee && currentUser.name) { 
-    return docAssignee.trim().toLowerCase() === currentUser.name.trim().toLowerCase(); 
-  } 
-  return false; 
-}
-// ====================================================================================
-
-// ================= HÀM XỬ LÝ GIAO DIỆN ĐĂNG NHẬP MỚI =================
-function toggleMainPassword() {
-  const p = document.getElementById('mainLoginPass');
-  p.type = p.type === 'password' ? 'text' : 'password';
-}
+function toggleMainPassword() { const p = document.getElementById('mainLoginPass'); p.type = p.type === 'password' ? 'text' : 'password'; }
 
 async function executeMainLogin() {
-  const u = document.getElementById('mainLoginUser').value.trim();
-  const p = document.getElementById('mainLoginPass').value.trim();
-  const alertBox = document.getElementById('mainLoginAlert');
-  const btn = document.getElementById('btnMainLogin');
-  
+  const u = document.getElementById('mainLoginUser').value.trim(), p = document.getElementById('mainLoginPass').value.trim();
+  const alertBox = document.getElementById('mainLoginAlert'), btn = document.getElementById('btnMainLogin');
   if(!u || !p) { alertBox.innerText = 'Vui lòng nhập đầy đủ Tài khoản và Mật khẩu!'; alertBox.style.display = 'block'; return; }
   
   btn.innerText = '⏳ Đang kiểm tra an ninh...'; btn.disabled = true; alertBox.style.display = 'none';
-  
   try {
-      const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username: u, password: p }) });
+      const res = await fetch(GOOGLE_APP_SCRIPT_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'login', username: u, password: p }) });
       const json = await res.json();
-      
       if (json && json.status === 'success') {
-          // Ép chuẩn quyền ngay từ lúc lưu vào Session
-          let finalRole = 'member';
-          let rawR = String(json.role).toLowerCase();
+          let finalRole = 'member'; let rawR = String(json.role).toLowerCase();
           if(rawR.includes('super') || rawR.includes('admin')) finalRole = 'superadmin';
           else if(rawR.includes('manager') || rawR.includes('trưởng')) finalRole = 'manager';
           else if(rawR.includes('guest') || rawR.includes('khách')) finalRole = 'guest';
 
           currentUser = { username: u.toLowerCase(), name: json.name, role: finalRole, token: json.token };
           sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser));
-          
-          document.getElementById('fullPageLogin').style.display = 'none';
-          document.getElementById('mainAppWrapper').style.display = 'block';
-          
+          document.getElementById('fullPageLogin').style.display = 'none'; document.getElementById('mainAppWrapper').style.display = 'block';
           document.getElementById('mainLoginUser').value = ''; document.getElementById('mainLoginPass').value = '';
           await loadAll(); render(); showToast(`✅ Xin chào ${currentUser.name}!`);
       } else { alertBox.innerText = json.message || 'Sai tài khoản hoặc mật khẩu!'; alertBox.style.display = 'block'; }
@@ -611,22 +552,13 @@ async function executeMainLogin() {
   finally { btn.innerText = 'Đăng nhập an toàn'; btn.disabled = false; }
 }
 
-function executeLogout() { 
-  currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); 
-  document.getElementById('mainAppWrapper').style.display = 'none';
-  document.getElementById('fullPageLogin').style.display = 'flex';
-  showToast('Đã đăng xuất!'); 
-}
-// ====================================================================
+function executeLogout() { currentUser = null; sessionStorage.removeItem(ADMIN_SESSION_KEY); document.getElementById('mainAppWrapper').style.display = 'none'; document.getElementById('fullPageLogin').style.display = 'flex'; showToast('Đã đăng xuất!'); }
 
 function renderAuthArea(){
   const wrap = document.getElementById('authArea');
   if(currentUser) { 
     let roleBadge = '👤 ' + escapeHtml(currentUser.name);
-    if(isSuperAdmin()) roleBadge = '👑 Quản trị'; 
-    else if(isManager()) roleBadge = '⭐ Trưởng nhóm';
-    else if(isGuest()) roleBadge = '👁️ Khách';
-    
+    if(isSuperAdmin()) roleBadge = '👑 Quản trị'; else if(isManager()) roleBadge = '⭐ Trưởng nhóm'; else if(isGuest()) roleBadge = '👁️ Khách';
     wrap.innerHTML = `<div class="admin-pill" onclick="executeLogout()"><span class="dot"></span> ${roleBadge} - Thoát</div>`; 
   }
 }
@@ -636,19 +568,14 @@ function saveDocs(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function parseRowsToRfis(rows) {
   let rfiMap = {};
   for (let i = 1; i < rows.length; i++) {
-    let cols = rows[i]; if (!cols || !cols[0]) continue;
-    let rId = cols[0];
+    let cols = rows[i]; if (!cols || !cols[0]) continue; let rId = cols[0];
     if (!rfiMap[rId]) rfiMap[rId] = { id: rId, code: cols[1], title: cols[2], date: cols[3], author: cols[4], status: cols[12], items: [] };
     rfiMap[rId].items.push({ id: cols[5], linkedDoc: cols[6], question: cols[7], qImage: cols[8], reply: cols[9], rImage: cols[10], replyDate: cols[11] });
-  }
-  return Object.values(rfiMap).reverse(); 
+  } return Object.values(rfiMap).reverse(); 
 }
 
 async function loadAll(){
-  categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories);
-  groups = safeJSON(localStorage.getItem(GROUP_KEY), groups);
-  plans = safeJSON(localStorage.getItem(PLAN_KEY), plans);
-  
+  categories = safeJSON(localStorage.getItem(CATEGORY_KEY), categories); groups = safeJSON(localStorage.getItem(GROUP_KEY), groups); plans = safeJSON(localStorage.getItem(PLAN_KEY), plans);
   try {
     const apiRes = await fetch(GOOGLE_APP_SCRIPT_API_URL + "?t=" + Date.now());
     if (apiRes.ok) {
@@ -657,64 +584,37 @@ async function loadAll(){
         if (json.docs && json.docs.length > 0) docs = parseRowsToDocs(json.docs);
         if (json.rfis && json.rfis.length > 0) rfis = parseRowsToRfis(json.rfis);
         if (json.users && json.users.length > 0) accounts = json.users; 
-        saveDocs(); 
-        return; 
+        saveDocs(); return; 
       }
     }
   } catch (err) { }
 }
 
 function parseDateToIso(d) {
-  if (!d) return ''; 
-  let s = String(d).trim(); 
-  if (s.includes('T')) {
-      const cleanMatch = s.match(/(\d{4}-\d{2}-\d{2})/);
-      if(cleanMatch) s = cleanMatch[1];
-      else s = s.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, '');
-  }
+  if (!d) return ''; let s = String(d).trim(); 
+  if (s.includes('T')) { const cleanMatch = s.match(/(\d{4}-\d{2}-\d{2})/); if(cleanMatch) s = cleanMatch[1]; else s = s.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, ''); }
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
   const p = s.split(/[\/\-]/);
-  if (p.length === 3) {
-    if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
-    return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-  } return s;
+  if (p.length === 3) { if (p[0].length === 4) return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } return s;
 }
 
 function parseRowsToDocs(rows) {
   const docsMap = {};
   for (let i = 1; i < rows.length; i++) {
     const cols = rows[i]; if (!cols || cols.length < 3) continue;
-    const code = String(cols[1] || '').trim(), name = String(cols[2] || '').trim();
-    if (!code && !name) continue;
-
-    const loaiHoSoTxt = String(cols[3] || '').trim().toLowerCase();
-    const loaiHoSo = (loaiHoSoTxt.includes('biện pháp') || loaiHoSoTxt === 'bienphap') ? 'bienphap' : 'shopdrawing';
-
+    const code = String(cols[1] || '').trim(), name = String(cols[2] || '').trim(); if (!code && !name) continue;
+    const loaiHoSoTxt = String(cols[3] || '').trim().toLowerCase(), loaiHoSo = (loaiHoSoTxt.includes('biện pháp') || loaiHoSoTxt === 'bienphap') ? 'bienphap' : 'shopdrawing';
     const catName = String(cols[4] || '').trim();
     if (catName && !categories[loaiHoSo].includes(catName)) { categories[loaiHoSo].push(catName); localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories)); }
-
     const assigneeName = String(cols[5] || '').trim();
-    if (assigneeName && !accounts.some(a => a.name.toLowerCase() === assigneeName.toLowerCase())) {
-      accounts.push({ username: assigneeName, name: assigneeName, role: 'member' });
-    }
+    if (assigneeName && !accounts.some(a => a.name.toLowerCase() === assigneeName.toLowerCase())) { accounts.push({ username: assigneeName, name: assigneeName, role: 'member' }); }
 
-    const pDate = cols.length > 19 ? parseDateToIso(cols[19]) : '';
-    const rawWf = cols.length > 23 ? String(cols[23] || '').trim() : '';
-    const workflow = (rawWf.includes('1') || rawWf.toLowerCase().includes('chỉ tvgs')) ? '1-buoc' : '2-buoc';
+    const pDate = cols.length > 19 ? parseDateToIso(cols[19]) : '', rawWf = cols.length > 23 ? String(cols[23] || '').trim() : '', workflow = (rawWf.includes('1') || rawWf.toLowerCase().includes('chỉ tvgs')) ? '1-buoc' : '2-buoc';
     const docKey = (code || name).toLowerCase(), stableId = makeStableDocId(code, name);
 
-    if (!docsMap[docKey]) {
-      docsMap[docKey] = { id: stableId, stt: parseInt(cols[0]) || (Object.keys(docsMap).length + 1), type: loaiHoSo, code: code, name: name, groupId: '', category: catName, assignee: assigneeName, desc: String(cols[6] || '').trim(), plannedDate: pDate, workflow: workflow, rounds: [] };
-    }
-
+    if (!docsMap[docKey]) { docsMap[docKey] = { id: stableId, stt: parseInt(cols[0]) || (Object.keys(docsMap).length + 1), type: loaiHoSo, code: code, name: name, groupId: '', category: catName, assignee: assigneeName, desc: String(cols[6] || '').trim(), plannedDate: pDate, workflow: workflow, rounds: [] }; }
     if (String(cols[7] || '').trim() || String(cols[8] || '').trim()) {
-      const getSt = (lbl) => {
-        lbl = String(lbl || '').toLowerCase();
-        if (lbl.includes('không')) return 'khong-duyet';
-        if (lbl.includes('ghi chú')) return 'duyet-ghi-chu';
-        if (lbl.includes('đã duyệt')) return 'da-duyet';
-        return 'cho-duyet';
-      };
+      const getSt = (lbl) => { lbl = String(lbl || '').toLowerCase(); if (lbl.includes('không')) return 'khong-duyet'; if (lbl.includes('ghi chú')) return 'duyet-ghi-chu'; if (lbl.includes('đã duyệt')) return 'da-duyet'; return 'cho-duyet'; };
       const rNum = parseInt(String(cols[7] || '').trim()) || (docsMap[docKey].rounds.length + 1);
       docsMap[docKey].rounds.push({ id: `${stableId}_r_${rNum}`, roundNum: rNum, submitDate: parseDateToIso(cols[8]), slaDays: parseInt(cols[10]) || 3, tvgsStatus: getSt(cols[11]), tvgsDate: parseDateToIso(cols[12]), tvgsLink: String(cols[13] || '').trim(), bqlStatus: getSt(cols[14]), bqlDate: parseDateToIso(cols[15]), bqlLink: String(cols[16] || '').trim(), note: String(cols[17] || '').trim(), fileLink: String(cols[18] || '').trim(), rfiLink: String(cols.length > 20 ? cols[20] : '').trim(), resolutionNote: String(cols.length > 21 ? cols[21] : '').trim(), approvedLink: String(cols.length > 22 ? cols[22] : '').trim(), createdAt: rNum });
     }
@@ -722,7 +622,6 @@ function parseRowsToDocs(rows) {
 }
 
 setInterval(() => { const anyModalOpen = document.querySelector('.modal-overlay.open'); if (document.visibilityState === 'visible' && !anyModalOpen) { forceUpdateData(true); } }, 60000);
-
 async function forceUpdateData(isAuto = false) {
   const syncEl = document.getElementById('syncStatus'); if(syncEl) syncEl.classList.add('updating');
   if(!isAuto) showToast('⏳ Đang đồng bộ dữ liệu...');
@@ -776,14 +675,7 @@ function render(){
   else wrap.innerHTML = renderListView();
 }
 
-function switchTab(t){ 
-  if(t === 'rfi') { currentView = 'rfi'; } 
-  else { 
-    currentType = t; currentView = 'docs'; viewState = 'list'; selectedId = null; selectedPlans.clear(); 
-    filterCategory = 'all'; filterGroup = 'all'; filterStatus = 'all'; filterAssignee = 'all'; 
-  }
-  render(); 
-}
+function switchTab(t){ if(t === 'rfi') { currentView = 'rfi'; } else { currentType = t; currentView = 'docs'; viewState = 'list'; selectedId = null; selectedPlans.clear(); filterCategory = 'all'; filterGroup = 'all'; filterStatus = 'all'; filterAssignee = 'all'; } render(); }
 function switchView(v){ currentView = v; selectedPlans.clear(); render(); window.scrollTo(0,0); }
 function goBack(){ viewState = 'list'; selectedId = null; render(); }
 function goToDetail(id){ selectedId = id; viewState = 'detail'; render(); window.scrollTo(0,0); }
@@ -793,13 +685,8 @@ function openLightbox(imageUrl) { const lb = document.getElementById('imageLight
 function closeLightbox() { document.getElementById('imageLightbox').classList.remove('open'); setTimeout(() => { document.getElementById('lightboxImg').src = ""; }, 300); }
 
 document.addEventListener('paste', function(e) {
-  const isCreate = document.getElementById('createRfiModal').classList.contains('open');
-  const isAdd = document.getElementById('addItemModal').classList.contains('open');
-  const isEdit = document.getElementById('editItemModal').classList.contains('open');
-  const isReply = document.getElementById('replyModal').classList.contains('open');
-  
+  const isCreate = document.getElementById('createRfiModal').classList.contains('open'); const isAdd = document.getElementById('addItemModal').classList.contains('open'); const isEdit = document.getElementById('editItemModal').classList.contains('open'); const isReply = document.getElementById('replyModal').classList.contains('open');
   if (!isCreate && !isAdd && !isEdit && !isReply) return;
-
   const items = (e.clipboardData || e.originalEvent.clipboardData).items;
   for (let index in items) {
     const item = items[index];
@@ -807,17 +694,8 @@ document.addEventListener('paste', function(e) {
       const reader = new FileReader();
       reader.onload = function(event) {
         tempImageBase64 = event.target.result; 
-        if (isCreate) {
-          document.getElementById('pasteHint').style.display = 'none'; document.getElementById('imagePreviewContainer').style.display = 'block'; document.getElementById('pastedImagePreview').src = tempImageBase64; document.getElementById('pasteArea').style.borderColor = 'var(--green)';
-        } else if (isAdd) {
-          document.getElementById('pasteHint_add').style.display = 'none'; document.getElementById('imagePreviewContainer_add').style.display = 'block'; document.getElementById('pastedImagePreview_add').src = tempImageBase64; document.getElementById('pasteArea_add').style.borderColor = 'var(--green)';
-        } else if (isEdit) {
-          document.getElementById('pasteHint_edit').style.display = 'none'; document.getElementById('imagePreviewContainer_edit').style.display = 'block'; document.getElementById('pastedImagePreview_edit').src = tempImageBase64; document.getElementById('pasteArea_edit').style.borderColor = 'var(--green)';
-        } else if (isReply) {
-          document.getElementById('pasteHint_reply').style.display = 'none'; document.getElementById('imagePreviewContainer_reply').style.display = 'block'; document.getElementById('pastedImagePreview_reply').src = tempImageBase64; document.getElementById('pasteArea_reply').style.borderColor = 'var(--green)';
-        }
-      };
-      reader.readAsDataURL(item.getAsFile()); e.preventDefault();
+        if (isCreate) { document.getElementById('pasteHint').style.display = 'none'; document.getElementById('imagePreviewContainer').style.display = 'block'; document.getElementById('pastedImagePreview').src = tempImageBase64; document.getElementById('pasteArea').style.borderColor = 'var(--green)'; } else if (isAdd) { document.getElementById('pasteHint_add').style.display = 'none'; document.getElementById('imagePreviewContainer_add').style.display = 'block'; document.getElementById('pastedImagePreview_add').src = tempImageBase64; document.getElementById('pasteArea_add').style.borderColor = 'var(--green)'; } else if (isEdit) { document.getElementById('pasteHint_edit').style.display = 'none'; document.getElementById('imagePreviewContainer_edit').style.display = 'block'; document.getElementById('pastedImagePreview_edit').src = tempImageBase64; document.getElementById('pasteArea_edit').style.borderColor = 'var(--green)'; } else if (isReply) { document.getElementById('pasteHint_reply').style.display = 'none'; document.getElementById('imagePreviewContainer_reply').style.display = 'block'; document.getElementById('pastedImagePreview_reply').src = tempImageBase64; document.getElementById('pasteArea_reply').style.borderColor = 'var(--green)'; }
+      }; reader.readAsDataURL(item.getAsFile()); e.preventDefault();
     }
   }
 });
@@ -825,8 +703,7 @@ document.addEventListener('paste', function(e) {
 function loadExistingImageToPasteArea(type, imageUrl) {
   if(imageUrl) {
     tempImageBase64 = imageUrl; 
-    if(type === 'edit') { document.getElementById('pasteHint_edit').style.display = 'none'; document.getElementById('imagePreviewContainer_edit').style.display = 'block'; document.getElementById('pastedImagePreview_edit').src = imageUrl;
-    } else if (type === 'reply') { document.getElementById('pasteHint_reply').style.display = 'none'; document.getElementById('imagePreviewContainer_reply').style.display = 'block'; document.getElementById('pastedImagePreview_reply').src = imageUrl; }
+    if(type === 'edit') { document.getElementById('pasteHint_edit').style.display = 'none'; document.getElementById('imagePreviewContainer_edit').style.display = 'block'; document.getElementById('pastedImagePreview_edit').src = imageUrl; } else if (type === 'reply') { document.getElementById('pasteHint_reply').style.display = 'none'; document.getElementById('imagePreviewContainer_reply').style.display = 'block'; document.getElementById('pastedImagePreview_reply').src = imageUrl; }
   } else { removePastedImage(type); }
 }
 
@@ -839,85 +716,54 @@ function removePastedImage(type, e) {
 }
 
 function openCreateRfiModal() {
-  document.getElementById('newRfiCode').value = ''; document.getElementById('newRfiTitle').value = ''; document.getElementById('newRfiQuestion').value = ''; document.getElementById('newRfiLinkedDoc').value = '';
-  removePastedImage('new'); document.getElementById('createRfiModal').classList.add('open');
+  document.getElementById('newRfiCode').value = ''; document.getElementById('newRfiTitle').value = ''; document.getElementById('newRfiQuestion').value = ''; document.getElementById('newRfiLinkedDoc').value = ''; removePastedImage('new'); document.getElementById('createRfiModal').classList.add('open');
 }
 
 async function saveNewRfi() {
   const title = document.getElementById('newRfiTitle').value.trim(), q = document.getElementById('newRfiQuestion').value.trim();
   if(!title || !q) { alert("Vui lòng điền Chủ đề và Nội dung!"); return; }
-  
-  const newRfi = { 
-    id: 'rfi_' + Date.now(), code: document.getElementById('newRfiCode').value || 'CV/RFI MỚI', title: title, date: todayDate(), author: currentUser.name, status: 'pending', 
-    items: [{ id: 'item_' + Date.now(), linkedDoc: document.getElementById('newRfiLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' }]
-  };
-  
-  rfis.unshift(newRfi); closeModal('createRfiModal'); render(); 
-  showToast("⏳ Đang lưu RFI lên Sheet...");
-  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: newRfi });
-  if(isSuccess) showToast("✅ Đã tạo RFI thành công!");
+  const newRfi = { id: 'rfi_' + Date.now(), code: document.getElementById('newRfiCode').value || 'CV/RFI MỚI', title: title, date: todayDate(), author: currentUser.name, status: 'pending', items: [{ id: 'item_' + Date.now(), linkedDoc: document.getElementById('newRfiLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' }] };
+  rfis.unshift(newRfi); closeModal('createRfiModal'); render(); showToast("⏳ Đang lưu RFI lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: newRfi }); if(isSuccess) showToast("✅ Đã tạo RFI thành công!");
 }
 
 function openAddItemModal(rfiId) {
-  activeRfiId = rfiId; document.getElementById('addItemQuestion').value = ''; document.getElementById('addItemLinkedDoc').value = '';
-  removePastedImage('add'); document.getElementById('addItemModal').classList.add('open');
+  activeRfiId = rfiId; document.getElementById('addItemQuestion').value = ''; document.getElementById('addItemLinkedDoc').value = ''; removePastedImage('add'); document.getElementById('addItemModal').classList.add('open');
 }
 
 async function saveNewItem() {
   const q = document.getElementById('addItemQuestion').value.trim();
   if(!q) { alert("Vui lòng điền nội dung!"); return; }
-  let rfi = rfis.find(r => r.id === activeRfiId);
-  rfi.items.push({ id: 'item_' + Date.now(), linkedDoc: document.getElementById('addItemLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' });
-  rfi.status = 'pending'; 
-  closeModal('addItemModal'); render(); 
-  showToast("⏳ Đang lưu mục mới lên Sheet...");
-  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
-  if(isSuccess) showToast("✅ Bổ sung mục hỏi thành công!");
+  let rfi = rfis.find(r => r.id === activeRfiId); rfi.items.push({ id: 'item_' + Date.now(), linkedDoc: document.getElementById('addItemLinkedDoc').value.trim(), question: q, qImage: tempImageBase64 || '', reply: '', rImage: '', replyDate: '' }); rfi.status = 'pending'; closeModal('addItemModal'); render(); showToast("⏳ Đang lưu mục mới lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi }); if(isSuccess) showToast("✅ Bổ sung mục hỏi thành công!");
 }
 
 function openEditItemModal(rfiId, itemId, existingQuestion, existingLinkedDoc, existingQImage) {
-  activeRfiId = rfiId; activeItemId = itemId;
-  document.getElementById('editItemQuestion').value = existingQuestion || ''; 
-  document.getElementById('editItemLinkedDoc').value = existingLinkedDoc || ''; 
-  loadExistingImageToPasteArea('edit', existingQImage); document.getElementById('editItemModal').classList.add('open');
+  activeRfiId = rfiId; activeItemId = itemId; document.getElementById('editItemQuestion').value = existingQuestion || ''; document.getElementById('editItemLinkedDoc').value = existingLinkedDoc || ''; loadExistingImageToPasteArea('edit', existingQImage); document.getElementById('editItemModal').classList.add('open');
 }
 
 async function saveEditedItem() {
   const q = document.getElementById('editItemQuestion').value.trim();
   if(!q) { alert("Vui lòng điền nội dung!"); return; }
-  let rfi = rfis.find(r => r.id === activeRfiId); let item = rfi.items.find(i => i.id === activeItemId);
-  item.question = q; item.linkedDoc = document.getElementById('editItemLinkedDoc').value.trim();
-  item.qImage = tempImageBase64 !== null ? tempImageBase64 : item.qImage;
-  closeModal('editItemModal'); render(); 
-  showToast("⏳ Đang lưu thay đổi lên Sheet...");
-  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
-  if(isSuccess) showToast("✅ Cập nhật mục thành công!");
+  let rfi = rfis.find(r => r.id === activeRfiId); let item = rfi.items.find(i => i.id === activeItemId); item.question = q; item.linkedDoc = document.getElementById('editItemLinkedDoc').value.trim(); item.qImage = tempImageBase64 !== null ? tempImageBase64 : item.qImage; closeModal('editItemModal'); render(); showToast("⏳ Đang lưu thay đổi lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi }); if(isSuccess) showToast("✅ Cập nhật mục thành công!");
 }
 
 function openReplyModal(rfiId, itemId, existingReply, existingRImage) {
-  activeRfiId = rfiId; activeItemId = itemId;
-  document.getElementById('replyModalTitle').innerText = existingReply ? "✏️ Sửa Phản hồi" : "✏️ Cập nhật Phản hồi";
-  document.getElementById('replyText').value = existingReply || ''; 
-  loadExistingImageToPasteArea('reply', existingRImage); document.getElementById('replyModal').classList.add('open');
+  activeRfiId = rfiId; activeItemId = itemId; document.getElementById('replyModalTitle').innerText = existingReply ? "✏️ Sửa Phản hồi" : "✏️ Cập nhật Phản hồi"; document.getElementById('replyText').value = existingReply || ''; loadExistingImageToPasteArea('reply', existingRImage); document.getElementById('replyModal').classList.add('open');
 }
 
 async function saveReply() {
   const txt = document.getElementById('replyText').value.trim();
   if(!txt) { alert("Vui lòng nhập nội dung phản hồi!"); return; }
-  let rfi = rfis.find(r => r.id === activeRfiId); let item = rfi.items.find(i => i.id === activeItemId);
-  item.reply = txt; item.replyDate = item.replyDate || todayDate(); 
-  item.rImage = tempImageBase64 !== null ? tempImageBase64 : item.rImage;
-  if (rfi.items.every(i => i.reply.trim() !== '')) rfi.status = 'approved';
-  closeModal('replyModal'); render(); 
-  showToast("⏳ Đang lưu phản hồi lên Sheet...");
-  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi });
-  if(isSuccess) showToast("✅ Đã lưu kết quả thành công!");
+  let rfi = rfis.find(r => r.id === activeRfiId); let item = rfi.items.find(i => i.id === activeItemId); item.reply = txt; item.replyDate = item.replyDate || todayDate(); item.rImage = tempImageBase64 !== null ? tempImageBase64 : item.rImage;
+  if (rfi.items.every(i => i.reply.trim() !== '')) rfi.status = 'approved'; closeModal('replyModal'); render(); showToast("⏳ Đang lưu phản hồi lên Sheet...");
+  const isSuccess = await sendDataToGoogleSheet({ action: 'saveRfi', rfi: rfi }); if(isSuccess) showToast("✅ Đã lưu kết quả thành công!");
 }
 
 function renderRfiView() {
   let rfiHtml = rfis.length === 0 ? `<div class="empty-state">Chưa có ghi nhận vướng mắc nào.</div>` : rfis.map(r => {
     let overallStatusHtml = r.status === 'pending' ? `<span class="tag status-pending">⏳ Đang xử lý</span>` : `<span class="tag status-approved">✅ Đã đóng (Xong)</span>`;
-    
     let itemsHtml = r.items.map((item, idx) => {
       let qThumb = item.qImage ? `<div class="rfi-thumb-wrapper"><img src="${escapeHtml(item.qImage)}" class="rfi-thumb" title="Bấm để phóng to" onclick="openLightbox('${escapeHtml(item.qImage)}')"></div>` : '';
       let rThumb = item.rImage ? `<div class="rfi-thumb-wrapper"><img src="${escapeHtml(item.rImage)}" class="rfi-thumb" title="Bấm để phóng to" onclick="openLightbox('${escapeHtml(item.rImage)}')"></div>` : '';
@@ -927,28 +773,23 @@ function renderRfiView() {
       if (currentUser && !isGuest() && (isManager() || isSuperAdmin() || currentUser.name === r.author)) {
           editQuestionBtn = `<button class="btn btn-ghost btn-sm" onclick="openEditItemModal('${r.id}', '${item.id}', '${escapeHtml(item.question).replace(/'/g, "\\'")}', '${escapeHtml(item.linkedDoc).replace(/'/g, "\\'")}', '${escapeHtml(item.qImage).replace(/'/g, "\\'")}')">✎ Sửa</button>`;
       }
-
       let replyBox = '';
       if (item.reply) {
-        let editReplyBtn = '';
-        if (currentUser && (isManager() || isSuperAdmin())) { editReplyBtn = `<button class="btn btn-ghost btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '${escapeHtml(item.reply).replace(/'/g, "\\'")}', '${escapeHtml(item.rImage).replace(/'/g, "\\'")}')">✎ Sửa</button>`; }
+        let editReplyBtn = ''; if (isManager() || isSuperAdmin()) { editReplyBtn = `<button class="btn btn-ghost btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '${escapeHtml(item.reply).replace(/'/g, "\\'")}', '${escapeHtml(item.rImage).replace(/'/g, "\\'")}')">✎ Sửa</button>`; }
         replyBox = `<div class="rfi-reply"><div class="rfi-r-title"><span>Phản hồi (${item.replyDate}):</span>${editReplyBtn}</div><div class="rfi-r-text">${escapeHtml(item.reply)}</div>${rThumb}</div>`;
       } else {
-        replyBox = `<div class="rfi-pending-reply"><span style="font-size:13px; font-weight:700; color:var(--amber);">⏳ Đang chờ trả lời...</span>${(currentUser && !isGuest()) ? `<button class="btn btn-primary btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '', '')">✏️ Cập nhật trả lời</button>` : ''}</div>`;
+        replyBox = `<div class="rfi-pending-reply"><span style="font-size:13px; font-weight:700; color:var(--amber);">⏳ Đang chờ trả lời...</span>${(!isGuest() && (isManager() || isSuperAdmin())) ? `<button class="btn btn-primary btn-sm" onclick="openReplyModal('${r.id}', '${item.id}', '', '')">✏️ Cập nhật trả lời</button>` : ''}</div>`;
       }
-
       return `<div class="rfi-item"><div class="rfi-question"><div class="rfi-q-title"><div style="display:flex; align-items:center; gap:8px;">MỤC SỐ ${idx + 1} ${linkedDocTag}</div>${editQuestionBtn}</div><div class="rfi-q-text">${escapeHtml(item.question)}</div>${qThumb}</div>${replyBox}</div>`;
     }).join('');
-
     return `<div class="rfi-card"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px dashed var(--border); padding-bottom:12px;"><div><div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><span class="doc-code" style="font-size: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary);">${escapeHtml(r.code)}</span> <span style="font-weight:800; font-size:16px;">${escapeHtml(r.title)}</span></div><div style="font-size:12px; color:var(--ink-light); font-weight:700;">Ngày tạo: ${r.date} | Người tạo: ${escapeHtml(r.author)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">${overallStatusHtml}</div></div><div class="rfi-item-list">${itemsHtml}</div>${(currentUser && !isGuest()) ? `<div style="margin-top:16px; text-align:center;"><button class="btn btn-ghost btn-sm" onclick="openAddItemModal('${r.id}')">＋ Bổ sung mục hỏi mới vào Công văn này</button></div>` : ''}</div>`;
   }).join('');
-
   return `<div class="toolbar-row1" style="margin-bottom: 24px; margin-top:20px;"><div class="search-box"><span>🔍</span><input type="text" placeholder="Tìm nội dung vướng mắc, mã bản vẽ..."></div><button class="btn btn-cyan" onclick="forceUpdateData()">🔄 Đồng bộ</button>${(currentUser && !isGuest()) ? `<button class="btn btn-primary" onclick="openCreateRfiModal()">＋ Tạo Công văn / RFI mới</button>` : ''}</div><div class="rfi-timeline">${rfiHtml}</div>`;
 }
 
+// BẢN SỬA LỖI: HIỂN THỊ ĐÚNG CÁC NÚT BẤM CHO QUẢN TRỊ VIÊN Ở DANH SÁCH
 function renderDocRow(d){
-  const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0;
-  const is1Step = d.workflow === '1-buoc';
+  const r = latestRound(d), ost = r ? overallStatus(r, d) : null, st = ost ? STATUS_META[ost] : null, od = r ? overdueDays(r, d) : 0; const is1Step = d.workflow === '1-buoc';
   return `
     <div class="doc-row ${od > 0 ? 'overdue' : ''}" onclick="goToDetail('${d.id}')">
       <div class="doc-row-top"><div class="stt">${d.stt}</div>
@@ -963,7 +804,7 @@ function renderDocRow(d){
           <div style="font-size:12px; color:var(--cyan); margin-top:6px; font-weight:700;">👤 ${escapeHtml(d.assignee || 'Chưa gán')} | 🔄 Lần ${d.rounds.length} ${d.desc ? `| 📝 ${escapeHtml(d.desc)}` : ''}</div>
           ${r && r.approvedLink ? `<div style="margin-top:10px;"><a href="${escapeHtml(r.approvedLink)}" target="_blank" onclick="event.stopPropagation()" class="btn-download-file" style="background:var(--primary); color:#fff; border:none;">✅ Tải Bản Vẽ Duyệt (PDF)</a></div>` : (r && r.fileLink ? `<div style="margin-top:10px;"><a href="${escapeHtml(r.fileLink)}" target="_blank" onclick="event.stopPropagation()" class="btn-download-file">📎 Tải File Nộp Trình</a></div>` : '')}
         </div>
-        ${(canUpdateProgress(d.assignee)) ? `<div class="doc-row-actions"><button class="btn btn-cyan btn-sm" onclick="event.stopPropagation(); openRoundModal('${d.id}')">Cập nhật tiến độ</button></div>` : ''}
+        ${(canUpdateProgress(d.assignee) || isSuperAdmin()) ? `<div class="doc-row-actions"><button class="btn btn-cyan btn-sm" onclick="event.stopPropagation(); openRoundModal('${d.id}')">Cập nhật tiến độ</button></div>` : ''}
         ${(isManager() || isSuperAdmin()) ? `<div class="doc-row-actions" style="margin-left:4px;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openDocModal('${d.id}')">✎</button></div>` : ''}
       </div>
     </div>`;
@@ -973,12 +814,10 @@ function renderListView(){
   const cats = docTypeCategories(currentType), cOpts = cats.map(c => `<option value="${escapeHtml(c)}" ${filterCategory === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
   const aOpts = accounts.map(a => `<option value="${escapeHtml(a.name)}" ${filterAssignee === a.name ? 'selected' : ''}>👤 ${escapeHtml(a.name)}</option>`).join('');
   const groupedList = groupedDocs(), totalCount = groupedList.reduce((s,g) => s + g.items.length, 0);
-
   let bodyHtml = totalCount === 0 ? `<div class="empty-state">Chưa có hồ sơ nào trong mục ${TYPE_META[currentType].label}.</div>` : groupedList.map(g => {
       const isC = collapsedGroups.has(g.key), odC = g.items.filter(isDocOverdue).length, rows = g.items.map(renderDocRow).join('');
       return `<div class="group-block"><div class="group-header ${isC ? 'collapsed' : ''}" onclick="toggleGroup('${escapeHtml(g.key)}')"><span class="group-name">${escapeHtml(g.label)}</span><span class="group-count">${g.items.length} hồ sơ</span> ${odC ? `<span class="group-overdue">🔴 ${odC}</span>` : ''}</div>${!isC ? `<div class="group-items">${rows}</div>` : ''}</div>`;
   }).join('');
-
   return `
     <div class="toolbar">
       <div class="toolbar-row1">
@@ -999,21 +838,18 @@ function renderListView(){
   `;
 }
 
+// BẢN SỬA LỖI: HIỂN THỊ ĐÚNG CÁC NÚT BẤM CHO QUẢN TRỊ VIÊN Ở MÀN HÌNH CHI TIẾT
 function renderDetailView(){
   const d = docs.find(x => x.id === selectedId); if(!d) { goBack(); return ''; }
-  const sorted = sortedRounds(d).reverse(), latest = sorted[0], currentOverdue = latest ? overdueDays(latest, d) : 0, approvedCount = (d.rounds||[]).filter(r => overallStatus(r, d) === 'da-duyet' || overallStatus(r, d) === 'duyet-ghi-chu').length;
-  const is1Step = d.workflow === '1-buoc';
-
+  const sorted = sortedRounds(d).reverse(), latest = sorted[0], currentOverdue = latest ? overdueDays(latest, d) : 0, approvedCount = (d.rounds||[]).filter(r => overallStatus(r, d) === 'da-duyet' || overallStatus(r, d) === 'duyet-ghi-chu').length; const is1Step = d.workflow === '1-buoc';
   let nodesHtml = sorted.length === 0 ? `<div class="empty-state">Chưa có vòng trình duyệt nào.</div>` : sorted.map((r,idx) => {
       const isLatest = latest && r.id === latest.id, od = overdueDays(r, d), st = STATUS_META[overallStatus(r, d)], deadline = addDays(r.submitDate, r.slaDays||3);
-      
       let extraLinks = '';
       if(r.fileLink) extraLinks += `<a href="${escapeHtml(r.fileLink)}" target="_blank" style="color:var(--cyan); font-size:12.5px; font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(34, 211, 238, 0.1); border-radius:6px;">📎 File trình</a>`;
       if(r.rfiLink && r.rfiLink.toLowerCase() !== 'không') extraLinks += `<a href="${escapeHtml(r.rfiLink)}" target="_blank" style="color:#C026D3; font-size:12.5px; font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(192, 38, 211, 0.1); border-radius:6px;">📄 Công văn/RFI</a>`;
       if(r.tvgsLink) extraLinks += `<a href="${escapeHtml(r.tvgsLink)}" target="_blank" style="color:var(--green); font-size:12.5px; font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(52, 211, 153, 0.1); border-radius:6px;">🧭 VB TVGS</a>`;
       if(r.bqlLink && !is1Step) extraLinks += `<a href="${escapeHtml(r.bqlLink)}" target="_blank" style="color:var(--green); font-size:12.5px; font-weight:700; text-decoration:none; padding:4px 8px; background:rgba(52, 211, 153, 0.1); border-radius:6px;">🏢 VB BQL</a>`;
       if(r.approvedLink) extraLinks += `<a href="${escapeHtml(r.approvedLink)}" target="_blank" style="color:#fff; background:var(--primary); font-size:12.5px; font-weight:800; text-decoration:none; padding:4px 10px; border-radius:6px;">✅ TẢI BẢN VẼ DUYỆT</a>`;
-
       let resolutionHtml = r.resolutionNote ? `<div style="margin-top:10px; background:rgba(245,158,11,0.1); border-left:3px solid var(--amber); padding:8px 12px; border-radius:0 8px 8px 0; font-size:13px;"><b style="color:var(--amber);">Giải trình:</b> <span style="color:var(--ink);">${escapeHtml(r.resolutionNote)}</span></div>` : '';
 
       return `<div style="border-left: 2px solid var(--border); padding-left: 20px; position: relative; margin-bottom: 20px;">
@@ -1021,7 +857,7 @@ function renderDetailView(){
           <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <div style="display:flex; gap:10px; align-items:center;"><span style="font-weight:800; color:var(--primary);">Lần ${r.roundNum || (sorted.length-idx)}</span><span class="tag ${st.cls}">${st.icon} ${st.label}</span>${isLatest ? '<span style="font-size:10px; font-weight:800; color:var(--cyan);">MỚI NHẤT</span>' : ''}</div>
-                ${(canUpdateProgress(d.assignee)) ? `<div><button class="btn btn-ghost btn-sm" onclick="openRoundModal('${d.id}','${r.id}')">✎ Sửa vòng này</button></div>` : ''}
+                ${(canUpdateProgress(d.assignee) || isSuperAdmin()) ? `<div><button class="btn btn-ghost btn-sm" onclick="openRoundModal('${d.id}','${r.id}')">✎ Sửa vòng này</button></div>` : ''}
             </div>
             <div class="row-info-grid">
               <div class="info-cell"><div class="info-lbl">Ngày trình</div><div class="info-val">${fmtDate(r.submitDate)}</div></div>
@@ -1052,7 +888,7 @@ function renderDetailView(){
         </div>
         <div style="display:flex; gap:8px; align-items:flex-start;">
           ${(isManager() || isSuperAdmin()) ? `<button class="btn btn-ghost btn-sm" onclick="openDocModal('${d.id}')">✎ Sửa thông tin gốc</button>` : ''}
-          ${(canUpdateProgress(d.assignee)) ? `<button class="btn btn-cyan btn-sm" onclick="openRoundModal('${d.id}')">＋ Trình duyệt lần tiếp theo</button>` : ''}
+          ${(canUpdateProgress(d.assignee) || isSuperAdmin()) ? `<button class="btn btn-cyan btn-sm" onclick="openRoundModal('${d.id}')">＋ Trình duyệt lần tiếp theo</button>` : ''}
         </div>
       </div>
       <div style="display:flex; gap:24px; margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
@@ -1069,11 +905,7 @@ function renderDetailView(){
 function renderPlanView(){
   let sourcePlans = planFilterType === 'all' ? [...(plans.shopdrawing || []), ...(plans.bienphap || [])] : [...(plans[planFilterType] || [])];
   let allPlans = [...sourcePlans]; 
-  docs.forEach(d => { 
-    if((planFilterType === 'all' || d.type === planFilterType) && d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { 
-      allPlans.push({ id: d.id, title: d.name, code: d.code, type: d.type, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); 
-    } 
-  });
+  docs.forEach(d => { if((planFilterType === 'all' || d.type === planFilterType) && d.plannedDate && !allPlans.some(p => p.linkedDocId === d.id)) { allPlans.push({ id: d.id, title: d.name, code: d.code, type: d.type, groupId: d.groupId, plannedDate: d.plannedDate, linkedDocId: d.id, assignee: d.assignee, note: d.desc, isVirtual: true }); } });
   allPlans.sort((a,b) => (a.plannedDate||'').localeCompare(b.plannedDate||''));
   
   const states = allPlans.map(p => {
@@ -1096,7 +928,7 @@ function renderPlanView(){
               <div class="doc-tag-row" style="margin-top:6px;">${stTag} ${!s.isDone ? (s.code === 'dang-xu-ly' ? `<span class="tag status-pending">🔄 Đang trình TVGS</span>` : `<span class="tag status-none">Chưa nộp</span>`) : ''} ${p.linkedDocId ? `<span class="tag status-approved-note">🔗 Đã liên kết Hồ sơ</span>` : ''}</div>
               <div class="row-info-grid"><div class="info-cell"><div class="info-lbl">Nhân sự thực hiện</div><div class="info-val" style="color:var(--cyan);">${escapeHtml(p.assignee || 'Chưa gán')}</div></div><div class="info-cell"><div class="info-lbl">Hạn Kế hoạch</div><div class="info-val" style="${s.overdueVsPlan?'color:var(--danger);':''}">${fmtDate(p.plannedDate)}</div></div></div>
             </div>
-            ${canUpdateProgress(p.assignee) && p.linkedDocId ? `<button class="btn btn-cyan btn-sm" onclick="event.stopPropagation(); openRoundModal('${p.linkedDocId}')">📤 Cập nhật trình</button>` : ''}
+            ${(canUpdateProgress(p.assignee) || isSuperAdmin()) && p.linkedDocId ? `<button class="btn btn-cyan btn-sm" onclick="event.stopPropagation(); openRoundModal('${p.linkedDocId}')">📤 Cập nhật trình</button>` : ''}
           </div>
         </div>`;
   }).join('')}</div>`;
@@ -1114,7 +946,6 @@ function renderPlanView(){
 function renderStatsView(){
   const list = docs; let statusCounts = { 'cho-duyet':0, 'da-duyet':0, 'duyet-ghi-chu':0, 'khong-duyet':0 };
   list.forEach(d => { const r = latestRound(d); if(r){ statusCounts[overallStatus(r, d)]++; } });
-  
   const mems = {};
   list.forEach(d => {
     const m = d.assignee ? d.assignee.trim() : 'Chưa phân công';
@@ -1153,7 +984,7 @@ function openMemberManageModal(){
 function renderMemberManageList(){
   const wrap = document.getElementById('memberManageList');
   wrap.innerHTML = accounts.map((a, idx) => {
-    let icon = '👤'; if(a.role==='superadmin' || a.role==='admin') icon='👑'; else if(a.role==='manager') icon='⭐'; else if(a.role==='guest') icon='👁️';
+    let icon = '👤'; if(String(a.role).includes('super') || String(a.role).includes('admin')) icon='👑'; else if(String(a.role).includes('manager')) icon='⭐'; else if(String(a.role).includes('guest')) icon='👁️';
     return `
     <div class="group-manage-item" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <div style="width:100px; font-size:11px; color:var(--ink-light); overflow:hidden; text-overflow:ellipsis;">${icon} ${escapeHtml(a.username)}</div>
@@ -1172,42 +1003,25 @@ function renderMemberManageList(){
 }
 
 async function updateMember(idx) {
-  const u = accounts[idx].username;
-  const nName = document.getElementById(`editName_${idx}`).value.trim();
-  const nPass = document.getElementById(`editPass_${idx}`).value.trim();
-  const nRole = document.getElementById(`editRole_${idx}`).value;
-  
+  const u = accounts[idx].username, nName = document.getElementById(`editName_${idx}`).value.trim(), nPass = document.getElementById(`editPass_${idx}`).value.trim(), nRole = document.getElementById(`editRole_${idx}`).value;
   if(!nName) return alert("Tên hiển thị không được để trống!");
-  
   const btn = event.target; btn.innerText = "⏳..."; btn.disabled = true;
   const isSuccess = await sendDataToGoogleSheet({ action: 'addOrUpdateUser', targetUsername: u, displayName: nName, newPass: nPass, role: nRole });
   btn.innerText = "Lưu"; btn.disabled = false;
-  
   if(isSuccess) {
-      accounts[idx].name = nName;
-      accounts[idx].role = nRole;
-      if(currentUser && currentUser.username === u) {
-         currentUser.name = nName; currentUser.role = nRole;
-         sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser));
-         renderAuthArea(); 
-      }
+      accounts[idx].name = nName; accounts[idx].role = nRole;
+      if(currentUser && currentUser.username === u) { currentUser.name = nName; currentUser.role = nRole; sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentUser)); renderAuthArea(); }
       renderMemberManageList(); showToast(`✅ Đã cập nhật ${nName}`);
   } else { alert("Lỗi đồng bộ lên máy chủ!"); }
 }
 
 async function addMemberFromModal(){
-  const u = document.getElementById('newMemUsername').value.trim();
-  const nName = document.getElementById('newMemName').value.trim();
-  const nPass = document.getElementById('newMemPass').value.trim() || '123';
-  const nRole = document.getElementById('newMemRole').value;
-  
+  const u = document.getElementById('newMemUsername').value.trim(), nName = document.getElementById('newMemName').value.trim(), nPass = document.getElementById('newMemPass').value.trim() || '123', nRole = document.getElementById('newMemRole').value;
   if(!u || !nName) { alert("Vui lòng nhập Tên Đăng Nhập và Tên Hiển Thị!"); return; }
   if(accounts.some(a => a.username.toLowerCase() === u.toLowerCase())) { alert("Tên đăng nhập đã tồn tại!"); return; }
-  
   const btn = event.target; btn.innerText = "⏳..."; btn.disabled = true;
   const isSuccess = await sendDataToGoogleSheet({ action: 'addOrUpdateUser', targetUsername: u, displayName: nName, newPass: nPass, role: nRole });
   btn.innerText = "＋ Tạo"; btn.disabled = false;
-
   if(isSuccess) { 
       accounts.push({ username: u, name: nName, role: nRole });
       document.getElementById('newMemUsername').value = ''; document.getElementById('newMemName').value = ''; document.getElementById('newMemPass').value = '';
@@ -1219,17 +1033,12 @@ async function deleteMember(idx){
   if(!confirm(`Xác nhận xóa tài khoản: ${accounts[idx].username}?`)) return;
   const u = accounts[idx].username;
   const isSuccess = await sendDataToGoogleSheet({ action: 'deleteUser', targetUsername: u });
-  if(isSuccess) { accounts.splice(idx, 1); renderMemberManageList(); showToast('🗑️ Đã xóa nhân sự!'); } 
-  else { alert("Lỗi khi xóa nhân sự trên máy chủ!"); }
+  if(isSuccess) { accounts.splice(idx, 1); renderMemberManageList(); showToast('🗑️ Đã xóa nhân sự!'); } else { alert("Lỗi khi xóa nhân sự trên máy chủ!"); }
 }
 
 function quickAddCategory(){
   const c = prompt("Nhập tên hạng mục mới:");
-  if(c && c.trim()){
-    const clean = c.trim();
-    if(!categories[currentType].includes(clean)){ categories[currentType].push(clean); saveCategories(); }
-    popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —');
-  }
+  if(c && c.trim()){ const clean = c.trim(); if(!categories[currentType].includes(clean)){ categories[currentType].push(clean); saveCategories(); } popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —'); }
 }
 
 async function openDocModal(id, isPlanMode=false){
@@ -1238,7 +1047,6 @@ async function openDocModal(id, isPlanMode=false){
   document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : 'Thêm hồ sơ mới';
   document.getElementById('docCode').value = d.code||''; document.getElementById('docName').value = d.name||''; 
   document.getElementById('docPlanDate').value = d.plannedDate||(isPlanMode?todayIso():''); document.getElementById('docDesc').value = d.desc||'';
-  
   const targetTypeCat = d.type || currentType; document.getElementById('docTypeSelect').value = targetTypeCat;
   popSel('docCategory', categories[targetTypeCat].map(c=>({val:c, lbl:c})), d.category, '— Chọn hạng mục —'); 
   popSel('docAssignee', accounts.map(a=>({val:a.name, lbl:a.name})), d.assignee, '— Chọn người phụ trách —');
@@ -1344,10 +1152,9 @@ function savePlan(){
   savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
 }
 
-// ================= KIỂM TRA ĐĂNG NHẬP NGAY TỪ ĐẦU (TỰ ĐỘNG SỬA LỖI PHÂN QUYỀN) =================
+// ================= TỰ ĐỘNG CHUẨN HÓA QUYỀN ĐỂ KHÔNG BỊ KẸT CACHE NỮA =================
 window.onload = async function() { 
   if (currentUser && currentUser.token) {
-     // Auto-Heal: Ép trình duyệt nhận diện quyền chuẩn xác, tránh kẹt bộ nhớ đệm
      let r = String(currentUser.role).toLowerCase();
      if(r.includes('super') || r.includes('admin')) currentUser.role = 'superadmin';
      else if(r.includes('manager') || r.includes('trưởng')) currentUser.role = 'manager';
@@ -1361,7 +1168,6 @@ window.onload = async function() {
      document.getElementById('fullPageLogin').style.display = 'flex';
      document.getElementById('mainAppWrapper').style.display = 'none';
   }
-  
   try { await loadAll(); } catch(err) { } finally { render(); } 
 };
 </script>
