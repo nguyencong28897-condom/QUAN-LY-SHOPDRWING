@@ -31,6 +31,13 @@
   * { box-sizing: border-box; } 
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Manrope', sans-serif; min-height: 100vh; transition: background 0.3s, color 0.3s; }
   
+  /* FIX LỖI CHỮ TRẮNG TRÊN NỀN TRẮNG CỦA CÁC Ô CHỌN */
+  select option { background-color: var(--surface); color: var(--ink); }
+  
+  /* NÚT ĐỔI SÁNG/TỐI */
+  .theme-btn { background: var(--surface); border: 1px solid var(--border); color: var(--ink); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; outline: none; }
+  .theme-btn:hover { border-color: var(--primary); color: var(--primary); box-shadow: 0 4px 10px rgba(56,189,248,0.2); }
+
   /* ================= CSS MÀN HÌNH ĐĂNG NHẬP CHÍNH ================= */
   .full-page-login { position: fixed; inset: 0; background: linear-gradient(120deg, #0F172A 0%, #0B0F19 50%, #111827 100%); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; font-family: 'Manrope', sans-serif; }
   .login-card-wrapper { position: relative; border-radius: 20px; z-index: 1; width: 100%; max-width: 420px; }
@@ -186,7 +193,7 @@
   .remove-image-btn:hover { background: var(--danger); }
 </style>
 </head>
-<body data-theme="dark">
+<body> <!-- Bỏ data-theme="dark" cứng ở đây vì JS sẽ lo liệu -->
 
   <!-- ================= MÀN HÌNH ĐĂNG NHẬP (GATEKEEPER) ================= -->
   <div id="fullPageLogin" class="full-page-login">
@@ -230,9 +237,13 @@
               <div class="brand-mark">SD/BP</div>
               <div class="brand-text"><div class="eyebrow">NCC · Quản lý trình duyệt</div><h1>Shopdrawing & Biện pháp</h1></div>
             </div>
+            
+            <!-- NÚT GIAO DIỆN SÁNG TỐI ĐÃ ĐƯỢC CHÈN VÀO ĐÂY -->
             <div style="display:flex; align-items:center; gap:12px;">
+              <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Đổi giao diện Sáng / Tối">☀️</button>
               <div class="auth-area" id="authArea"></div>
             </div>
+
           </div>
           <div class="hero-stats" id="heroStats"></div>
         </div>
@@ -255,7 +266,7 @@
         <div class="modal-body">
           <div class="field-row">
             <div class="field"><label>Loại (Shopdrawing / Biện pháp)</label>
-              <!-- AUTO INCREMENT KHÍ ĐỔI LOẠI -->
+              <!-- AUTO INCREMENT KHI ĐỔI LOẠI -->
               <select id="docTypeSelect" onchange="if(!editingDocId) document.getElementById('docCode').value = generateNextCode(this.value); popSel('docCategory', categories[this.value].map(c=>({val:c, lbl:c})), '', '— Chọn hạng mục —');">
                 <option value="shopdrawing">📐 Shopdrawing (SDS)</option>
                 <option value="bienphap">📋 Biện pháp thi công (MSS)</option>
@@ -485,7 +496,7 @@
 
 <script>
 // =======================================================================
-// LINK CỦA BẠN ĐÃ ĐƯỢC GIỮ NGUYÊN (KHÔNG CẦN THAY)
+// THAY LẠI ĐÚNG ĐƯỜNG LINK API APP SCRIPT CỦA BẠN VÀO ĐÂY!!!
 // =======================================================================
 const GOOGLE_APP_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbywzmmGvX-Dfn1rAX_XNwvU2gY0rCcw1KSX3RR9xBCUVLE_KwnnSKoCIlAPaWDFZRoC/exec";
 
@@ -515,6 +526,17 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); d
 function popSel(id, arr, sel, dflt){ const el = document.getElementById(id); if(el) el.innerHTML = `<option value="">${dflt}</option>` + arr.map(x=>`<option value="${escapeHtml(x.val)}" ${x.val===sel?'selected':''}>${escapeHtml(x.lbl)}</option>`).join(''); }
 function safeJSON(str, fallback) { try { const p = JSON.parse(str); return (p !== null && p !== undefined) ? p : fallback; } catch(e) { return fallback; } }
 function todayDate(){ const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+
+// ================= HÀM XỬ LÝ GIAO DIỆN SÁNG / TỐI =================
+function toggleTheme() {
+  const body = document.body;
+  const currentTheme = body.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('lhbimTheme', newTheme);
+  document.getElementById('themeToggleBtn').innerText = newTheme === 'dark' ? '☀️' : '🌙';
+}
+// ====================================================================
 
 // ================= TỰ ĐỘNG SINH MÃ =================
 function generateNextCode(type) {
@@ -547,7 +569,6 @@ function canUpdateProgress(docAssignee) {
 }
 function requireManagerAction(){ if(!isManager()){ showToast('🔒 Chỉ Trưởng nhóm hoặc Quản trị viên mới được thao tác!'); return false; } return true; }
 function requireSuperAdminAction(){ if(!isSuperAdmin()){ showToast('🔒 Chỉ Quản trị (Super Admin) mới có quyền này!'); return false; } return true; }
-// ===============================================
 
 async function sendDataToGoogleSheet(dataPayload) {
   if (!GOOGLE_APP_SCRIPT_API_URL) return false;
@@ -1084,14 +1105,12 @@ function quickAddCategory(){
   if(c && c.trim()){ const clean = c.trim(); if(!categories[currentType].includes(clean)){ categories[currentType].push(clean); saveCategories(); } popSel('docCategory', categories[currentType].map(x=>({val:x, lbl:x})), clean, '— Chọn hạng mục —'); }
 }
 
-// ================= TỰ ĐỘNG ĐIỀN MÃ KHI THÊM MỚI =================
 async function openDocModal(id, isPlanMode=false){
   if(!requireManagerAction()) return;
   editingDocId = id || null; const d = id ? (docs.find(x=>x.id===id) || {}) : {};
   document.getElementById('docModalTitle').innerText = id ? 'Sửa thông tin hồ sơ gốc' : 'Thêm hồ sơ mới';
   const targetTypeCat = d.type || currentType; document.getElementById('docTypeSelect').value = targetTypeCat;
   
-  // Tự động nhảy số hoặc điền mã cũ nếu đang sửa
   document.getElementById('docCode').value = id ? (d.code||'') : generateNextCode(targetTypeCat);
   
   document.getElementById('docName').value = d.name||''; 
@@ -1194,7 +1213,6 @@ function openPlanModal(){
   document.getElementById('planModal').classList.add('open');
 }
 
-// ================= AUTO FILL Ở MỤC KẾ HOẠCH =================
 function togglePlanManualStatus(){ 
   const sel = document.getElementById('planLinkedDoc');
   document.getElementById('planManualStatusField').style.display = sel.value ? 'none' : 'block'; 
@@ -1218,7 +1236,14 @@ function savePlan(){
   savePlans(); closeModal('planModal'); render(); showToast('Đã lưu kế hoạch!');
 }
 
+// ================= KIỂM TRA MẶC ĐỊNH GIAO DIỆN LÚC TẢI TRANG =================
 window.onload = async function() { 
+  // Gọi lại setting Sáng/Tối đã lưu trên máy
+  const savedTheme = localStorage.getItem('lhbimTheme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  const tBtn = document.getElementById('themeToggleBtn');
+  if(tBtn) tBtn.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
   if (currentUser && currentUser.token) {
      let r = String(currentUser.role).toLowerCase();
      if(r.includes('super') || r.includes('admin')) currentUser.role = 'superadmin';
